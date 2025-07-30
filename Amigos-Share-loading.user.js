@@ -6,8 +6,8 @@
 // @namespace    https://mbitts.com
 // @homepageURL  https://github.com/bitts/amigos-share
 // @supportURL   https://github.com/bitts/amigos-share/issues
-// @updateURL    https://github.com/bitts/amigos-share/Amigos-Share-loading.user.js
-// @downloadURL  https://github.com/bitts/amigos-share/Amigos-Share-loading.user.js
+// @updateURL    https://github.com/bitts/amigos-share/raw/refs/heads/main/Amigos-Share-loading.user.js
+// @downloadURL  https://github.com/bitts/amigos-share/raw/refs/heads/main/Amigos-Share-loading.user.js
 // @icon         https://amigos-share.club/favicon.ico
 // @include      https://cliente.amigos-share.club/*
 // @run-at       document-start
