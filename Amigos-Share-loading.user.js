@@ -16,6 +16,9 @@
 // @noframes
 // @grant        GM_xmlhttpRequest
 // @grant        GM_notification
+// @grant        GM_getValue
+// @grant        GM_setValue
+
 // ==/UserScript==
 
 
