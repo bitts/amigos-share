@@ -1,49 +1,131 @@
 // ==UserScript==
 // @name         Amigos-Share-loading
 // @description  Carregamento infinito de conteudo da Comunidade de Compartilhamentos de arquivos via Torrent Amigos-share
-// @author       Bitts (https://mbitts.com/)
-// @copyright    2024, Marcelo Valvassori (https://openuserjs.org/scripts/marcelo.valvassori)
+// @author       Bitts [github.com/bitts](mbitts.com)
+// @copyright    2025, Bitts [github.com/bitts](mbitts.com)
 // @namespace    https://mbitts.com
 // @homepageURL  https://github.com/bitts/amigos-share
 // @supportURL   https://github.com/bitts/amigos-share/issues
-// @updateURL    https://github.com/bitts/amigos-share/raw/refs/heads/main/Amigos-Share-loading.user.js
-// @downloadURL  https://github.com/bitts/amigos-share/raw/refs/heads/main/Amigos-Share-loading.user.js
+// @updateURL    https://raw.githubusercontent.com/bitts/amigos-share/refs/heads/main/Amigos-Share-loading.user.js
+// @downloadURL  https://raw.githubusercontent.com/bitts/amigos-share/refs/heads/main/Amigos-Share-loading.user.js
 // @icon         https://amigos-share.club/favicon.ico
 // @include      https://cliente.amigos-share.club/*
 // @run-at       document-start
-// @version      2.1.0
+// @version      2.0.0
 // @license      MIT; https://opensource.org/licenses/MIT
 // @noframes
 // @grant        GM_xmlhttpRequest
 // @grant        GM_notification
 // @grant        GM_getValue
 // @grant        GM_setValue
-
+// @connect      raw.githubusercontent.com
 // ==/UserScript==
 
+var DEBUG = true;
 
 var langs = {
-    ['pt-br'] : {
-        msg_err_sys : 'Erro ao carregar página.',
-        get_user_no : 'Não foi possível pegar o ID do usuário',
-        get_lang_no : 'Lingua escolhida sem biblioteca configurada. Padrão "pt-BR" definido.',
+    ['pt-br']: {
+        msg_err_sys: 'Erro ao carregar página.',
+        get_user_no: 'Não foi possível pegar o ID do usuário',
+        get_lang_no: 'Lingua escolhida sem biblioteca configurada. Padrão "pt-BR" definido.',
+        upt_syst_no: 'Verificação de atualização adiada. Verificando novamente em: ',
+        tmp_defi_no: 'Tampermonkey: A tag @updateURL ou @downloadURL não foi definida. Não é possível verificar por atualizaçõe.',
+        tmp_hrxd_no: 'Tampermonkey: Erro na requisição XHR para verificação de atualização:',
+        tmp_tgvs_no: 'Tampermonkey: Não foi possível encontrar a tag @version no script remoto.',
+        tmp_down_no: 'Tampermonkey: Erro ao baixar script para verificação de atualização. Status: ',
+        tmp_scpt_ok: 'Seu script está atualizado | Versão: ',
+        tmp_scpt_tt: 'Atualização de Script Disponível',
+        tmp_scpt_mg: 'Uma nova versão ([remoteVersion]) do script "[nameScript]" está disponível. Clique para atualizar.',
+        tmp_scpt_st: '[nameScript] Verificando atualização da versão [currentVersion] em: [updateURL]'
+    },
+    ['en']: {
+        msg_err_sys: 'Error loading page.',
+        get_user_no: 'Could not get user ID',
+        get_lang_no: 'Selected language has no configured library. Default "pt-BR" set.',
+        upt_syst_no: 'Update check postponed. Checking again in: ',
+        tmp_defi_no: 'Tampermonkey: The @updateURL or @downloadURL tag was not defined. Cannot check for updates.',
+        tmp_hrxd_no: 'Tampermonkey: XHR request error for update check:',
+        tmp_tgvs_no: 'Tampermonkey: Could not find @version tag in remote script.',
+        tmp_down_no: 'Tampermonkey: Error downloading script for update check. Status: ',
+        tmp_scpt_ok: 'Your script is up to date | Version: ',
+        tmp_scpt_tt: 'Script Update Available',
+        tmp_scpt_mg: 'A new version ([remoteVersion]) of the script "[nameScript]" is available. Click to update.',
+        tmp_scpt_st: '[nameScript] Checking update for version [currentVersion] at: [updateURL]'
+    },
+    ['zh-cn']: {
+        msg_err_sys: '加载页面出错。',
+        get_user_no: '无法获取用户ID',
+        get_lang_no: '所选语言未配置库。已设置默认值“pt-BR”。',
+        upt_syst_no: '更新检查已推迟。再次检查时间：',
+        tmp_defi_no: 'Tampermonkey: 未定义@updateURL或@downloadURL标签。无法检查更新。',
+        tmp_hrxd_no: 'Tampermonkey: 检查更新的XHR请求错误：',
+        tmp_tgvs_no: 'Tampermonkey: 无法在远程脚本中找到@version标签。',
+        tmp_down_no: 'Tampermonkey: 下载更新检查脚本时出错。状态：',
+        tmp_scpt_ok: '您的脚本是最新的 | 版本：',
+        tmp_scpt_tt: '脚本更新可用',
+        tmp_scpt_mg: '脚本“[nameScript]”的新版本（[remoteVersion]）可用。点击更新。',
+        tmp_scpt_st: '[nameScript] 正在检查版本[currentVersion]的更新：[updateURL]'
+    },
+    ['es']: {
+        msg_err_sys: 'Error al cargar la página.',
+        get_user_no: 'No se pudo obtener el ID de usuario',
+        get_lang_no: 'El idioma seleccionado no tiene una biblioteca configurada. Se estableció el valor predeterminado "pt-BR".',
+        upt_syst_no: 'Comprobación de actualización pospuesta. Comprobando de nuevo en: ',
+        tmp_defi_no: 'Tampermonkey: La etiqueta @updateURL o @downloadURL no fue definida. No se puede buscar actualizaciones.',
+        tmp_hrxd_no: 'Tampermonkey: Error en la solicitud XHR para la verificación de actualización:',
+        tmp_tgvs_no: 'Tampermonkey: No se pudo encontrar la etiqueta @version en el script remoto.',
+        tmp_down_no: 'Tampermonkey: Error al descargar el script para la verificación de actualización. Estado: ',
+        tmp_scpt_ok: 'Tu script está actualizado | Versión: ',
+        tmp_scpt_tt: 'Actualización de Script Disponible',
+        tmp_scpt_mg: 'Una nueva versión ([remoteVersion]) del script "[nameScript]" está disponible. Haz clic para actualizar.',
+        tmp_scpt_st: '[nameScript] Comprobando actualización de la versión [currentVersion] en: [updateURL]'
+    },
+    ['hi']: {
+        msg_err_sys: 'पृष्ठ लोड करने में त्रुटि।',
+        get_user_no: 'उपयोगकर्ता आईडी प्राप्त नहीं किया जा सका',
+        get_lang_no: 'चुनी गई भाषा में कोई लाइब्रेरी कॉन्फ़िगर नहीं है। डिफ़ॉल्ट "pt-BR" सेट किया गया।',
+        upt_syst_no: 'अपडेट जांच स्थगित। इसमें फिर से जांच कर रहा हूँ: ',
+        tmp_defi_no: 'टैंपरमंकी: @updateURL या @downloadURL टैग परिभाषित नहीं किया गया था। अपडेट के लिए जांच नहीं कर सकते।',
+        tmp_hrxd_no: 'टैंपरमंकी: अपडेट जांच के लिए XHR अनुरोध त्रुटि:',
+        tmp_tgvs_no: 'टैंपरमंकी: रिमोट स्क्रिप्ट में @version टैग नहीं मिला।',
+        tmp_down_no: 'टैंपरमंकी: अपडेट जांच के लिए स्क्रिप्ट डाउनलोड करने में त्रुटि। स्थिति: ',
+        tmp_scpt_ok: 'आपकी स्क्रिप्ट अद्यतन है | संस्करण: ',
+        tmp_scpt_tt: 'स्क्रिप्ट अपडेट उपलब्ध है',
+        tmp_scpt_mg: 'स्क्रिप्ट "[nameScript]" का एक नया संस्करण ([remoteVersion]) उपलब्ध है। अपडेट करने के लिए क्लिक करें।',
+        tmp_scpt_st: '[nameScript] संस्करण [currentVersion] के लिए अपडेट की जांच कर रहा है: [updateURL]'
+    },
+    ['fr']: {
+        msg_err_sys: 'Erreur lors du chargement de la page.',
+        get_user_no: "Impossible d'obtenir l'ID utilisateur",
+        get_lang_no: 'La langue sélectionnée n\'a pas de bibliothèque configurée. Par défaut "pt-BR" est défini.',
+        upt_syst_no: 'Vérification des mises à jour reportée. Vérification à nouveau dans : ',
+        tmp_defi_no: 'Tampermonkey: Le tag @updateURL ou @downloadURL n\'a pas été défini. Impossible de vérifier les mises à jour.',
+        tmp_hrxd_no: 'Tampermonkey: Erreur de requête XHR pour la vérification des mises à jour :',
+        tmp_tgvs_no: 'Tampermonkey: Impossible de trouver le tag @version dans le script distant.',
+        tmp_down_no: 'Tampermonkey: Erreur lors du téléchargement du script pour la vérification des mises à jour. Statut : ',
+        tmp_scpt_ok: 'Votre script est à jour | Version : ',
+        tmp_scpt_tt: 'Mise à jour du script disponible',
+        tmp_scpt_mg: 'Une nouvelle version ([remoteVersion]) du script "[nameScript]" est disponible. Cliquez pour mettre à jour.',
+        tmp_scpt_st: '[nameScript] Vérification de la mise à jour de la version [currentVersion] sur : [updateURL]'
     }
-}
+};
 
 class CheckUpdate{
+
     constructor() {
-        // --- Configurações ---
-        this.DEBUG = true;
+        this.DEBUG = DEBUG;
         this.CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // Verificar a cada 24 horas (em milissegundos)
         this.LAST_CHECK_KEY = 'lastScriptUpdateCheck';
-        // --- Chamada do teste ---
+
+        this.lang = langs[document.documentElement.lang ?? 'pt-BR'];
+
         this.checkForUpdates();
     }
 
     msg(txt, type){
         if(this.DEBUG){
             var script = GM_info.script.name || 'Scripts by Bitts';
-            txt = `[${script}] ${txt}`;
+            txt = `[${script}](${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}) ${txt}`;
             switch(type){
                 case 'debug':
                     console.debug(txt)
@@ -68,53 +150,58 @@ class CheckUpdate{
     }
 
     checkForUpdates() {
-        const lastCheck = GM_getValue(this.LAST_CHECK_KEY, 0);
-        const now = Date.now();
-        const nameScript = GM_info.script.name || 'Scripts by Bitts';
+        const th = this;
+        try{
+            const lastCheck = GM_getValue(th.LAST_CHECK_KEY, 0);
+            const now = Date.now();
+            const nameScript = GM_info.script.name || 'Scripts by Bitts';
 
-        if (now - lastCheck < this.CHECK_INTERVAL_MS) {
-            this.msg(`Verificação de atualização adiada. Verificando novamente em: `+ new Date(lastCheck + this.CHECK_INTERVAL_MS));
-            return; // Não verifica se o intervalo não passou
-        }
-
-        GM_setValue(this.LAST_CHECK_KEY, now); // Atualiza o timestamp da última verificação
-
-        const currentVersion = GM_info.script.version;
-        const updateURL = GM_info.script.updateURL || GM_info.script.downloadURL;
-
-        if (!updateURL) {
-            this.msg(`Tampermonkey: A tag @updateURL ou @downloadURL não foi definida. Não é possível verificar por atualizaçõe.`, 'warn');
-            return;
-        }
-
-        this.msg(`[${nameScript}] Verificando atualização da versão ${currentVersion} em: ${updateURL}`);
-
-        GM_xmlhttpRequest({
-            method: 'GET',
-            url: updateURL,
-            onload: function(response) {
-                if (response.status === 200) {
-                    const remoteScriptContent = response.responseText;
-                    const remoteVersionMatch = remoteScriptContent.match(/@version\s+([^\n]+)/);
-                    if (remoteVersionMatch && remoteVersionMatch[1]) {
-                        const remoteVersion = remoteVersionMatch[1].trim();
-                        if (this.compareVersions(currentVersion, remoteVersion) < 0) {
-                            this.msg(`Nova versão disponível: ${remoteVersion} / Sua versão: (${currentVersion})`);
-                            GM_notification({
-                                title: 'Atualização de Script Disponível',
-                                text: `Uma nova versão (${remoteVersion}) do script "${nameScript}" está disponível. Clique para atualizar.`,
-                                onclick: function() {
-                                    window.open(updateURL, '_blank'); // Abre a URL para que o Tampermonkey possa instalar a atualização
-                                }
-                            });
-                        } else this.msg(`Seu script está atualizado (versão: ${currentVersion}).`);
-                    } else this.msg(`Tampermonkey: Não foi possível encontrar a tag @version no script remoto.`,'warn');
-                } else this.msg(`Tampermonkey: Erro ao baixar script para verificação de atualização. Status: ${response.status}`,'error');
-            },
-            onerror: function(error) {
-                this.msg(`Tampermonkey: Erro na requisição XHR para verificação de atualização: ${error}`, 'error');
+            if (now - lastCheck < th.CHECK_INTERVAL_MS) {
+                th.msg(th.lang.upt_syst_no + new Date(lastCheck + th.CHECK_INTERVAL_MS).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+                return; // Não verifica se o intervalo não passou
             }
-        });
+
+            GM_setValue(th.LAST_CHECK_KEY, now); // Atualiza o timestamp da última verificação
+
+            const currentVersion = GM_info.script.version;
+            const updateURL = GM_info.script.updateURL || GM_info.script.downloadURL;
+
+            if (!updateURL) {
+                th.msg(th.lang.tmp_defi_no, 'warn');
+                return;
+            }
+
+            th.msg(th.lang.tmp_scpt_st.replace('[nameScript]', nameScript).replace('[currentVersion]',currentVersion).replace('[updateURL]', updateURL));
+
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: updateURL,
+                onload: function(response) {
+                    if (response.status === 200) {
+                        const remoteScriptContent = response.responseText;
+                        const remoteVersionMatch = remoteScriptContent.match(/@version\s+([^\n]+)/);
+                        if (remoteVersionMatch && remoteVersionMatch[1]) {
+                            const remoteVersion = remoteVersionMatch[1].trim();
+                            if (th.compareVersions(currentVersion, remoteVersion) < 0) {
+                                //th.msg(`Nova versão disponível: ${remoteVersion} / Sua versão: (${currentVersion})`);
+                                GM_notification({
+                                    title: th.lang.tmp_scpt_tt,
+                                    text: th.lang.tmp_scpt_mg.replace('[remoteVersion]', remoteVersion).replace('[nameScript]', nameScript ),
+                                    onclick: function() {
+                                        window.open(updateURL, '_blank'); // Abre a URL para que o Tampermonkey possa instalar a atualização
+                                    }
+                                });
+                            } else th.msg(`${th.lang.tmp_scpt_ok} ${currentVersion}`);
+                        } else th.msg(th.lang.tmp_tgvs_no,'warn');
+                    } else th.msg(`${th.lang.tmp_down_no} ${response.status}`,'error');
+                },
+                onerror: function(error) {
+                    console.error(th.tmp_hrxd_no, error);
+                }
+            });
+        }catch(e){
+            th.msg(e)
+        }
     }
 
     // metodo para comparar versões (ex: "1.0.1" vs "1.1.0")
@@ -133,14 +220,14 @@ class CheckUpdate{
     }
 }
 
-class HacksAS{
+class AS{
 
     constructor() {
         this.about = {
-            'author' : 'Marcelo Valvassori (mbitts.com)',
-            'supportURL':'https://openuserjs.org/scripts/marcelo.valvassori',
+            'author' : 'Bitts [https://github.com/bitts](mbitts.com)',
+            'supportURL':'https://github.com/bitts/amigos-share/issues',
             'create':'2019-04-13',
-            'lastUpdate':'2025-07-01',
+            'lastUpdate':'2025-07-30',
             'name':'[ASC]',
             'description':'Amigos-Share page load ajax scroll content'
         }
@@ -150,24 +237,18 @@ class HacksAS{
         this.lang_default = document.documentElement.lang ?? 'pt-BR';
         this.lang = langs[this.lang_default];
         this.linguagens = langs;
+        var th = this;
 
-        var pages = this.getPagination();
-        this.callAjaxPages( pages )
+        try{
+            setTimeout(function() {
+                var pages = th.getPagination();
+                th.callAjaxPages( pages );
+            }, 1000);
 
-        let user = this.getIDuser();
-    }
-    setLang(lingua){
-        if(typeof lingua !== "undefined" && lingua.trim() != ''){
-            let contem = false;
-            for (let [key] of Object.entries(this.linguagens)) {
-                if(lingua == key)contem = true;
-            }
-            if(!contem)this.lang = this.lang_default;
-            else {
-                this.lang = lingua;
-                return lingua;
-            }
-        }else throw new Error(this.lang.get_lang_no);
+            let user = this.getIDuser();
+        }catch(e){
+            if(DEBUG)console.error(e);
+        }
     }
     getIDuser(){
         try{
@@ -176,6 +257,9 @@ class HacksAS{
             else throw new Error(this.lang.get_user_no);
         }catch(e){
         }
+    }
+    getTotalPages(){
+        return $('.pagination li a.page-link').map(function(){ if( vlr = parseInt(this.innerText) > 0) return vlr; }).length;
     }
     getPagination(){
         try{
@@ -274,12 +358,13 @@ class HacksAS{
             });
         }
     }
+
 }
 
 
 (function() {
     'use strict';
 
-    new CheckUpdate();
-    new HacksAS();
+    try{ new CheckUpdate();} catch (e){ console.error(`Erro ao verificar por atualizações.`,e) }
+    try{ new AS(); } catch(e){ console.error(`Erro ao executar script.`,e) }
 })();
