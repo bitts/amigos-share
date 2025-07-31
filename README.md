@@ -4,12 +4,10 @@
 
 - Script: [Amigos-Share-loading.user.js](https://raw.githubusercontent.com/bitts/amigos-share/refs/heads/main/Amigos-Share-loading.user.js)
 
-
-![Exemplo de carregamento da sexta página](https://github.com/bitts/amigos-share/blob/main/asc_load-ajax.png)
+Adição de recursos os quais não fazem parte deste sistema
 
 ## Uso
 https://www.tampermonkey.net/?ext=dhdg
-
 
 ## Recursos
 - Scroll infinito para todos as url's da comunidade que contém paginação vísivel através do elemento de classe "pagination";
@@ -31,3 +29,12 @@ Permite que você instale, gerencie e execute scripts de usuário em suas págin
 
 O que é o Violentmonkey:
 É uma extensão de código aberto que oferece suporte a scripts de usuário em navegadores com suporte a WebExtensions.É compatível com a maioria dos scripts de Greasemonkey e Tampermonkey.Possui recursos como atualização automática de scripts, execução ordenada de scripts, suporte a funções GM e sincronização com serviços como Dropbox e OneDrive. 
+
+_________________________________________________________
+
+![Exemplo de carregamento da sexta página](https://github.com/bitts/amigos-share/blob/main/asc_load-ajax.png)
+
+* Imagem mostrando o carregamento via Ajax de novos conteúdos ```sem o carregamento total da página para isso```;
+
+* No exemplo é exibido o conteúdo da sexta página enquando é carregado o da sétima ```imagem é exibida```.
+
