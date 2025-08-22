@@ -377,17 +377,14 @@ class AS{
                             lidos.push(npg);
                             npg++;
                             
-                            let url = window.location.href.replace(/page=[+-]?\d+/g,'').concat(`&page=${npg}`);
-                            //ajustando a paginação
                             [
                                 window.location.href.replace(window.location.origin,'').replace('/','').replace(/page=[+-]?\d+/g,'').concat(`&page=${npg}`).replace(/(&)+/g, '$1'),
-                                decodeURIComponent(window.location.href.replace(window.location.origin,'').replace('/','').replace(/page=[+-]?\d+/g,'')).replace(' ','+')
+                                decodeURIComponent(window.location.href.replace(window.location.origin,'').replace('/','').replace(/page=[+-]?\d+/g,'')).replace(' ','+').concat(`&page=${npg}`).replace(/(&)+/g, '$1'),
                             ].map(function(p){
                               $(`.pagination a.page-link[href='${p}']`).attr({'href':`#separador_${npg}`});
                             });
-
-                            $(`.pagination a.page-link[href='${pag}']`).attr({'href':`#separador_${npg}`});
-
+                            
+                            let url = window.location.href.replace(/page=[+-]?\d+/g,'').concat(`&page=${npg}`);
                             $.ajax({
                                 'url':  url,
                                 'dataType': 'html',
