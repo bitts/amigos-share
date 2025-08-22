@@ -6,12 +6,12 @@
 // @namespace    https://mbitts.com
 // @homepageURL  https://github.com/bitts/amigos-share
 // @supportURL   https://github.com/bitts/amigos-share/issues
-// @updateURL    https://raw.githubusercontent.com/bitts/amigos-share/refs/heads/main/Amigos-Share-loading.user.js
-// @downloadURL  https://raw.githubusercontent.com/bitts/amigos-share/refs/heads/main/Amigos-Share-loading.user.js
+// @updateURL    https://openuserjs.org/install/marcelo.valvassori/Amigos-Share-loading.user.js
+// @downloadURL  https://openuserjs.org/install/marcelo.valvassori/Amigos-Share-loading.user.js
 // @icon         https://amigos-share.club/favicon.ico
 // @include      https://cliente.amigos-share.club/*
 // @run-at       document-start
-// @version      2.0.0
+// @version      2.1.0
 // @license      MIT; https://opensource.org/licenses/MIT
 // @noframes
 // @grant        GM_xmlhttpRequest
@@ -21,7 +21,7 @@
 // @connect      raw.githubusercontent.com
 // ==/UserScript==
 
-var DEBUG = true;
+var DEBUG = false;
 
 var langs = {
     ['pt-br']: {
@@ -227,9 +227,14 @@ class AS{
             'author' : 'Bitts [https://github.com/bitts](mbitts.com)',
             'supportURL':'https://github.com/bitts/amigos-share/issues',
             'create':'2019-04-13',
-            'lastUpdate':'2025-07-30',
+            'lastUpdate':'2025-08-20',
             'name':'[ASC]',
-            'description':'Amigos-Share page load ajax scroll content'
+            'description':'Amigos-Share page load ajax scroll content',
+            'upgrades' : {
+                '21/07/2025': 'Melhorias no Ajax Scroll Content para todas as páginas que exibem alguma paginação.',
+                '22/07/2025': 'Verificação de atualizações do script.',
+                '20/08/2025': 'Adição de barra indicadora de distribuição das páginas carregadas e alteração das URLs da barra de paginação para referência as barras indicadoras.'
+            }
         }
         this.icone = 'https://amigos-share.club/favicon.ico';
         this.url_base = 'torrents-search.php';
@@ -240,6 +245,8 @@ class AS{
         var th = this;
 
         try{
+            this.getAbout();
+
             setTimeout(function() {
                 var pages = th.getPagination();
                 th.callAjaxPages( pages );
@@ -249,6 +256,37 @@ class AS{
         }catch(e){
             if(DEBUG)console.error(e);
         }
+    }
+    getAbout(){
+
+        $('body').append(
+            $('<div />')
+            .addClass('tooltips')
+            .css({
+                'position': 'fixed','bottom': '10px','left': '10px', 'cursor': 'pointer','z-index':'9',
+                'line-height': '10px','text-align': 'center','color': 'white','background-color': 'black',
+                'border': '2px solid grey','border-radius': '50%','width':'25px','height':'25px','padding-top': '5px'
+            })
+            .append(
+                $('<p />').text('B'),
+                $('<span />').addClass('info bg-secondary rounded position-absolute')
+                .css({'text-align': 'justify','line-height': '2','padding': '1em','width': '500px'})
+                .append(
+                    $('<h4 />').css({'text-align':'center'}).text(this.about.description),
+                    $('<p />').css({'text-align':'center'}).text(`Criado por: ${this.about.author}`),
+                    $('<p />').append(
+                        'Suporte: ',
+                        $('<a />',{'href': this.about.supportURL}).text(this.about.supportURL)
+                    ),
+                    $('<br />'),
+                    $('<p />').text('Atualizações:'),
+                    $('<ul />').append(
+                        Object.entries(this.about.upgrades).map(udt => $('<li />').append(`[${udt[0]}] ${udt[1]}`))
+                    )
+                )
+            )
+
+        );
     }
     getIDuser(){
         try{
@@ -286,36 +324,29 @@ class AS{
     callAjaxPages(page){
         if(page > 0){
             var npg = 0, wait = false, lidos = new Array(), call = this;
+
+            //ativando quando carregar uma página
             call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
                 $(_html).find('ul.list-group li').each(function(){
-                    let li = $(this);
-                    $('body').find('.list-group li:last').after(li);
+                    $('body').find('.list-group li:last').after($(this));
                 });
-                let pgnt = $(_html).find('.pagination').html();
-                $('body').find('.pagination').html(pgnt);
                 $('.hkb-loading').remove();
-                wait = false;
-                npg = _npg;
-                lidos = _lidos;
+                wait = false; npg = _npg; lidos = _lidos;
             });
 
-
+            //ativando quando no uso do scroll
             $(window).scroll(function() {
                 if ( $(document).height() - $(window).height() - 2 < $(window).scrollTop() ) {
                     call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
                         $(_html).find('ul.list-group li').each(function(){
-                            let li = $(this);
-                            $('body').find('.list-group li:last').after(li);
+                            $('body').find('.list-group li:last').after($(this));
                         });
-                        let pgnt = $(_html).find('.pagination').html();
-                        $('body').find('.pagination').html(pgnt);
                         $('.hkb-loading').remove();
-                        wait = false;
-                        npg = _npg;
-                        lidos = _lidos;
+                        wait = false; npg = _npg; lidos = _lidos;
                     });
                 }
             });
+
         }
     }
 
@@ -328,8 +359,10 @@ class AS{
                     if(page > 0){
                         if(npg <= page && !lidos.includes(npg) && !wait){
                             wait = true;
-                            var load = $('<li />').addClass('hkb-loading list-group-item dark-gray').append(
-                                $('<div />').addClass('list-group-item-addon list-group-item-content')
+                            let separador = $('<li />', {'id': `separador_${npg}` }).addClass(`separador_pagina-${npg} list-group-item dark-gray`).append(npg)
+                                .css({'text-align':'right','margin-right': '-15px', 'text-decoration': 'underline','cursor': 'pointer'});
+                            let load = $('<li />').addClass(`hkb-loading list-group-item dark-gray`).append(
+                                $('<div />').addClass(`list-group-item-addon list-group-item-content`)
                                 .css({
                                     'background-image': load_image,
                                     'background-size': 'contain',
@@ -338,11 +371,15 @@ class AS{
                                     'padding': '1em'
                                 })
                             );
-                            ths.find('.list-group li:last').after(load);
+                            ths.find('.list-group li:last').after(load, separador);
 
                             lidos.push(npg);
                             npg++;
                             let url = window.location.href.replace(/page=[+-]?\d+/g,'').concat(`&page=${npg}`);
+                            let pag = window.location.href.replace(window.location.origin,'').replace('/','').replace(/page=[+-]?\d+/g,'').concat(`&page=${npg}`).replace(/(&)+/g, '$1');
+
+                            $(`.pagination a.page-link[href='${pag}']`).attr({'href':`#separador_${npg}`});
+
                             $.ajax({
                                 'url':  url,
                                 'dataType': 'html',
@@ -365,6 +402,7 @@ class AS{
 (function() {
     'use strict';
 
-    try{ new CheckUpdate();} catch (e){ console.error(`Erro ao verificar por atualizações.`,e) }
-    try{ new AS(); } catch(e){ console.error(`Erro ao executar script.`,e) }
+    try{ new CheckUpdate();} catch (e){ console.error(`Erro ao verificar por atualizações.`, e); }
+    try{ new AS(); } catch(e){ console.error(`Erro ao executar script.`, e); }
 })();
+
