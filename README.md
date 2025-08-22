@@ -2,7 +2,8 @@
 
 - [Tampermonkey](https://www.tampermonkey.net/)
 
-- Script: [Amigos-Share-loading.user.js](https://raw.githubusercontent.com/bitts/amigos-share/refs/heads/main/Amigos-Share-loading.user.js)
+- Script: [Amigos-Share-loading.user.js](https://openuserjs.org/install/marcelo.valvassori/Amigos-Share-loading.user.js)
+
 
 Adição de recursos os quais não fazem parte deste sistema
 
@@ -21,7 +22,10 @@ https://www.tampermonkey.net/?ext=dhdg
 - Verifica por atualizações: Quando o script é atualizado no github, um aviso sugere a atualização do mesmo, ação que pode ser realizado quando clicado no aviso;
 
 
-Obs.: Não foi testado no Violentmonkey / Somente Tampermonkey (Google Chrome)
+Obs.: 
+* Não foi testado no Violentmonkey / Somente Tampermonkey (Google Chrome e Firefox testados)
+* Funciona corretamente também no Firefox para Android com Extensão Tampermonkey instalada
+  
 
 O que é Tampermonkey:
 É um gerenciador de scripts de usuário popular para navegadores baseados em Blink e WebKit, como Chrome, Edge, Safari, Opera e Firefox. 
