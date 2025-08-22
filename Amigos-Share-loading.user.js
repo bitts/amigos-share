@@ -6,6 +6,7 @@
 // @namespace    https://mbitts.com
 // @homepageURL  https://github.com/bitts/amigos-share
 // @supportURL   https://github.com/bitts/amigos-share/issues
+// @connect      openuserjs.org
 // @updateURL    https://openuserjs.org/install/marcelo.valvassori/Amigos-Share-loading.user.js
 // @downloadURL  https://openuserjs.org/install/marcelo.valvassori/Amigos-Share-loading.user.js
 // @icon         https://amigos-share.club/favicon.ico
