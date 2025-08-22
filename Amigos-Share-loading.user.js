@@ -376,7 +376,7 @@ class AS{
                             lidos.push(npg);
                             npg++;
                             let url = window.location.href.replace(/page=[+-]?\d+/g,'').concat(`&page=${npg}`);
-                            let pag = window.location.href.replace(window.location.origin,'').replace('/','').replace(/page=[+-]?\d+/g,'').concat(`&page=${npg}`).replace(/(&)+/g, '$1');
+                            let pag = decodeURIComponent(window.location.href.replace(window.location.origin,'').replace('/','')).replace(' ','+').replace(/page=[+-]?\d+/g,'').concat(`&page=${npg}`).replace(/(&)+/g, '$1');
 
                             $(`.pagination a.page-link[href='${pag}']`).attr({'href':`#separador_${npg}`});
 
