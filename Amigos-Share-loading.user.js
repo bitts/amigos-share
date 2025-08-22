@@ -255,7 +255,7 @@ class AS{
 
             let user = this.getIDuser();
         }catch(e){
-            if(DEBUG)console.error(e);
+            //if(DEBUG)console.error(e);
         }
     }
     getAbout(){
