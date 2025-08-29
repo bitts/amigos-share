@@ -234,7 +234,7 @@ class AS{
                 '21/07/2025': 'Melhorias no Ajax Scroll Content para todas as páginas que exibem alguma paginação.',
                 '22/07/2025': 'Verificação de atualizações do script.',
                 '20/08/2025': 'Adição de barra indicadora de distribuição das páginas carregadas e alteração das URLs da barra de paginação para referência as barras indicadoras.',
-                '28/08/2025': 'Diversas melhorias conforme sugestões realizadas no <b><a href="https://cliente.amigos-share.club/forum.php?action=ver_topico&id=1578">fórum</a></b> entre elas melhorias na páginação com substituição dos links e textos que agora referenciam a própria página no marcador criado, além de efeitos visuais na barra de paginação ao executar a rolagem.'
+                '28/08/2025': 'Diversas melhorias conforme sugestões realizadas no <b><a href="https://cliente.amigos-share.club/forum.php?action=ver_topico&id=1578">fórum</a></b> entre elas melhorias na paginação com substituição dos links e textos que agora referenciam a própria página no marcador criado, além de efeitos visuais na barra de paginação ao executar a rolagem.'
             }
         }
         this.icone = 'https://amigos-share.club/favicon.ico';
@@ -292,7 +292,7 @@ class AS{
     }
     getSeparador(npg = 0, total = 0){
         if(total > 0){
-            let sep = $(`a[href='#separador_${npg}']`)
+            let sep = $(`a[href='#separador_${npg}']`), pag = this.pages-1;
             if(sep.length)sep.show();
             else{
                 $('.pagination').append(
@@ -304,7 +304,7 @@ class AS{
             return $('<li />', {'id': `separador_${npg}`})
             .addClass(`separador_pagina-${npg} separador_pagina list-group-item dark-gray`)
             .append(
-                `Página: <b>${npg}</b> de <b>${this.pages}</b> (Total de Itens: ${total})`
+                `Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`
             )
             .css({
                 'text-align':'right',
@@ -375,15 +375,14 @@ class AS{
             this.setPaginacao(page);
 
             call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
-                let total_carregados = $(_html).find('ul.list-group li').length;
-                let separador = call.getSeparador(npg, total_carregados);
                 let conteudo = $(_html).find('ul.list-group li');
+                let separador = call.getSeparador(1, conteudo.length);
                 if(separador){
                     $('body').find('ul.list-group li:first').before( separador )
-                    npg++;
-                    separador = call.getSeparador(npg, total_carregados);
-                    $('body').find('.list-group li:last').after( separador, conteudo);
-                    separador.attr({'posicionamento': separador.offset().top });
+                    //npg++;
+                    //separador = call.getSeparador(npg, conteudo.length);
+                    //$('body').find('.list-group li:last').after( separador, conteudo);
+                    //separador.attr({'posicionamento': separador.offset().top });
                 }
                 $('.hkb-loading').remove();
                 wait = false; npg = _npg+1; lidos = _lidos;
