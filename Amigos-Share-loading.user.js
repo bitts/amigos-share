@@ -11,7 +11,7 @@
 // @icon         https://amigos-share.club/favicon.ico
 // @include      https://cliente.amigos-share.club/*
 // @run-at       document-start
-// @version      2.2.1
+// @version      2.2.0
 // @license      MIT; https://opensource.org/licenses/MIT
 // @noframes
 // @grant        GM_xmlhttpRequest
@@ -387,9 +387,9 @@ class AS{
             $(window).scroll(function() {
                 //efeitos da nova paginação
                 if( ( $(`li[class*='separador_pagina-']`).length && $(`a[href*='#separador_']`).length ) ){
-                    let currentScrollTop = $(window).scrollTop() + $(window).height(),
+                    let currentScrollTop = $(window).scrollTop(),
                         bar_pgPosAtual = $(`ul.pagination`).offset().top,
-                        last;
+                        last, hg = $(window).height();
                     // Está a descer
                     if (currentScrollTop > lastScrollTop)last = call.separadores.map(e => { if(e.posicionamento < lastScrollTop)return e.separador });
                     // Está a subir
@@ -404,7 +404,7 @@ class AS{
 
                 if ( $(document).height() - $(window).height() - 2 < $(window).scrollTop() ) {
                     call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
-
+                        npg++;
                         if( $('ul.pagination').length > 0 )$('a.page-link').closest('li').removeClass('active');
                         $(`a[href='#separador_${npg}']`).closest('li').addClass('page-item active');
 
