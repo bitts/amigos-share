@@ -19,7 +19,7 @@ https://www.tampermonkey.net/?ext=dhdg
     Disponíveis: Inglês (en), Mandarim (zh-cn), Espanhol (es), Hindi (hi) e Francês (fr).
 
 - Ativação/Desativação das mensagem para debug;
-- Verifica por atualizações: Quando o script é atualizado no github, um aviso sugere a atualização do mesmo, ação que pode ser realizado quando clicado no aviso;
+- Verifica por atualizações: Quando o script é atualizado no [openuserjs.org](https://openuserjs.org/scripts/marcelo.valvassori/Amigos-Share-loading), um aviso sugere a atualização do mesmo, ação que pode ser realizado quando clicado no aviso;
 
 
 Obs.: 
@@ -36,7 +36,7 @@ O que é o Violentmonkey:
 
 _________________________________________________________
 
-![Exemplo de carregamento da sexta página](https://github.com/bitts/amigos-share/blob/main/asc_load-ajax.png)
+![Exemplo de carregamento da sexta página](https://raw.githubusercontent.com/bitts/amigos-share/refs/heads/v2.1.0/asc_load-ajax2.png)
 
 * Imagem mostrando o carregamento via Ajax de novos conteúdos ```sem o carregamento total da página para isso```;
 
