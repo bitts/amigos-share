@@ -11,7 +11,7 @@
 // @icon         https://amigos-share.club/favicon.ico
 // @include      https://cliente.amigos-share.club/*
 // @run-at       document-start
-// @version      2.1.1
+// @version      2.2.0
 // @license      MIT; https://opensource.org/licenses/MIT
 // @noframes
 // @grant        GM_xmlhttpRequest
