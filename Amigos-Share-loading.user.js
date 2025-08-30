@@ -190,7 +190,7 @@ class CheckUpdate{
                         if (remoteVersionMatch && remoteVersionMatch[1]) {
                             const remoteVersion = remoteVersionMatch[1].trim();
                             if (th.compareVersions(currentVersion, remoteVersion) < 0) {
-                                //th.msg(`Nova versão disponível: ${remoteVersion} / Sua versão: (${currentVersion})`);
+                                msg(`Nova versão disponível: ${remoteVersion} / Sua versão: (${currentVersion})`);
                                 GM_notification({
                                     title: th.lang.tmp_scpt_tt,
                                     text: th.lang.tmp_scpt_mg.replace('[remoteVersion]', remoteVersion).replace('[nameScript]', nameScript ),
