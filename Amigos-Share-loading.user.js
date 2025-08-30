@@ -112,8 +112,7 @@ var langs = {
 
 function msg(txt, type){
     if(DEBUG){
-        var script = GM_info.script.name || 'Scripts by Bitts';
-        txt = `[${script}](${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}) ${txt}`;
+        txt = `ASC[plg-load](${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}) ${txt}`;
 
         let style='font-family: Arial Black;font-size:10pt;'
         switch(type){
@@ -121,7 +120,7 @@ function msg(txt, type){
                 console.debug(`%c${txt}`,`${style};color: blue;`);
                 break;
             case 'info':
-                console.info(`%c${txt}`,`${style};color: #00FF00;`);
+                console.info(`%c${txt}`,`${style};color: #006400;`);
                 break;
             case 'log':
                 console.log(`%c${txt}`,`${style};color: #0000FF;`);
@@ -157,16 +156,22 @@ class CheckUpdate{
             const lastCheck = GM_getValue(th.LAST_CHECK_KEY, 0);
             const now = Date.now();
             const nameScript = GM_info.script.name || 'Scripts by Bitts';
+            const currentVersion = GM_info.script.version;
+            const updateURL = GM_info.script.updateURL || GM_info.script.downloadURL;
 
             if (now - lastCheck < th.CHECK_INTERVAL_MS) {
-                msg(th.lang.upt_syst_no + new Date(lastCheck + th.CHECK_INTERVAL_MS).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+                msg( `Versão atual: v${currentVersion}`, 'info');
+                msg( th.lang.upt_syst_no + new Date(lastCheck + th.CHECK_INTERVAL_MS).toLocaleString('pt-BR', {
+                   timeZone: 'America/Sao_Paulo', //Para ajustar o fuso horário
+                    //weekday: 'long', // Exibe o nome completo do dia da semana (ex: "Quarta-feira") | 'short' (curto), 'narrow' (bem curto)
+                    //year: 'numeric', // Exibe o ano em formato numérico (ex: "2025") | '2-digit' (duas últimas décadas)
+                    //month: 'long',   // Exibe o nome completo do mês (ex: "Janeiro") | 'long' (por extenso), 'short' (curto), 'narrow' (bem curto)
+                    //day: 'numeric'   // Exibe o dia em formato numérico (ex: "15")   | '2-digit' (numérico com dois dígitos).
+                }));
                 return; // Não verifica se o intervalo não passou
             }
 
             GM_setValue(th.LAST_CHECK_KEY, now); // Atualiza o timestamp da última verificação
-
-            const currentVersion = GM_info.script.version;
-            const updateURL = GM_info.script.updateURL || GM_info.script.downloadURL;
 
             if (!updateURL) {
                 msg(th.lang.tmp_defi_no, 'warn');
@@ -346,7 +351,7 @@ class AS{
         else throw new Error(this.lang.get_user_no);
     }
     getTotalPages(){
-        return $('.pagination li a.page-link').map(function(){ if( vlr = parseInt(this.innerText) > 0) return vlr; }).length;
+        return parseInt($('.pagination li a.page-link').map(function(){ let vlr = 0; if( vlr = parseInt(this.innerText) > 0) return vlr; }).length -1);
     }
     getPagination(){
         try{
@@ -369,7 +374,7 @@ class AS{
             return 0; //new Error(e);
         }
     }
-    setPaginacao(npg){
+    setPaginacao(){
         try{
             $('.pagination').css({
                 'position': 'fixed',
@@ -396,15 +401,13 @@ class AS{
     callAjaxPages(page){
         if(page > 0){
             var npg = 0, wait = false, lidos = new Array(), call = this;
-
-            this.setPaginacao(page);
-
+            this.setPaginacao();
             try{
                 call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
                     let carregado = $('ul.list-group li').length -1;
                     let separador = call.getSeparador(1, carregado);
                     if(separador){
-                        $('body').find('ul.list-group li:first').before( separador )
+                        $('body').find('ul.list-group li:first').before( separador );
                         npg++;
                     }
                     $('.hkb-loading').remove();
