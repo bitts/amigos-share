@@ -110,6 +110,35 @@ var langs = {
     }
 };
 
+function msg(txt, type){
+    if(DEBUG){
+        var script = GM_info.script.name || 'Scripts by Bitts';
+        txt = `[${script}](${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}) ${txt}`;
+
+        let style='font-family: Arial Black;font-size:10pt;'
+        switch(type){
+            case 'debug':
+                console.debug(`%c${txt}`,`${style};color: blue;`);
+                break;
+            case 'info':
+                console.info(`%c${txt}`,`${style};color: #00FF00;`);
+                break;
+            case 'log':
+                console.log(`%c${txt}`,`${style};color: #0000FF;`);
+                break;
+            case 'warn':
+                console.warn(`%c${txt}`,`${style};color: yellow;`);
+                break;
+            case 'error':
+                console.error(`%c${txt}`,`${style};color: #FF0000;`);
+                break;
+            default:
+                console.log(`%c${txt}`,`${style};color: blue;`);
+                break;
+        }
+    }
+}
+
 class CheckUpdate{
 
     constructor() {
@@ -122,33 +151,6 @@ class CheckUpdate{
         this.checkForUpdates();
     }
 
-    msg(txt, type){
-        if(this.DEBUG){
-            var script = GM_info.script.name || 'Scripts by Bitts';
-            txt = `[${script}](${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}) ${txt}`;
-            switch(type){
-                case 'debug':
-                    console.debug(txt)
-                    break;
-                case 'info':
-                    console.info(txt)
-                    break;
-                case 'log':
-                    console.log(txt);
-                    break;
-                case 'warn':
-                    console.warn(txt);
-                    break;
-                case 'error':
-                    console.error(txt);
-                    break;
-                default:
-                    console.log(txt);
-                    break;
-            }
-        }
-    }
-
     checkForUpdates() {
         const th = this;
         try{
@@ -157,7 +159,7 @@ class CheckUpdate{
             const nameScript = GM_info.script.name || 'Scripts by Bitts';
 
             if (now - lastCheck < th.CHECK_INTERVAL_MS) {
-                th.msg(th.lang.upt_syst_no + new Date(lastCheck + th.CHECK_INTERVAL_MS).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+                msg(th.lang.upt_syst_no + new Date(lastCheck + th.CHECK_INTERVAL_MS).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
                 return; // Não verifica se o intervalo não passou
             }
 
@@ -167,11 +169,11 @@ class CheckUpdate{
             const updateURL = GM_info.script.updateURL || GM_info.script.downloadURL;
 
             if (!updateURL) {
-                th.msg(th.lang.tmp_defi_no, 'warn');
+                msg(th.lang.tmp_defi_no, 'warn');
                 return;
             }
 
-            th.msg(th.lang.tmp_scpt_st.replace('[nameScript]', nameScript).replace('[currentVersion]',currentVersion).replace('[updateURL]', updateURL));
+            msg(th.lang.tmp_scpt_st.replace('[nameScript]', nameScript).replace('[currentVersion]',currentVersion).replace('[updateURL]', updateURL));
 
             GM_xmlhttpRequest({
                 method: 'GET',
@@ -191,16 +193,16 @@ class CheckUpdate{
                                         window.open(updateURL, '_blank'); // Abre a URL para que o Tampermonkey possa instalar a atualização
                                     }
                                 });
-                            } else th.msg(`${th.lang.tmp_scpt_ok} ${currentVersion}`);
-                        } else th.msg(th.lang.tmp_tgvs_no,'warn');
-                    } else th.msg(`${th.lang.tmp_down_no} ${response.status}`,'error');
+                            } else msg(`${th.lang.tmp_scpt_ok} ${currentVersion}`);
+                        } else msg(th.lang.tmp_tgvs_no,'warn');
+                    } else msg(`${th.lang.tmp_down_no} ${response.status}`,'error');
                 },
                 onerror: function(error) {
                     console.error(th.tmp_hrxd_no, error);
                 }
             });
         }catch(e){
-            th.msg(e)
+            msg(e)
         }
     }
 
@@ -246,19 +248,19 @@ class AS{
         this.separadores = [];
         var th = this;
 
-        try{
-            th.getJquery(function(){
-                setTimeout(function() {
-                    th.getAbout();
-                    th.pages = th.getPagination();
+        th.getJquery(function(){
+            setTimeout(function() {
+                th.getAbout();
+                th.pages = th.getPagination();
+                try{
                     th.callAjaxPages( th.pages );
-                }, 2000);
+                }catch(e){
+                    msg(e, 'error');
+                }
+            }, 2000);
 
-                let user = th.getIDuser();
-            });
-        }catch(e){
-            //if(DEBUG)console.error(e);
-        }
+            //let user = th.getIDuser();
+        });
     }
     getJquery(executar){
         if (typeof window.jQuery === typeof undefined || !window.jQuery) {
@@ -270,7 +272,7 @@ class AS{
             script.onload = executar;
 
             script.onerror = function() {
-                console.error('Falha ao carregar jQuery!');
+                msg(`Falha ao carregar jQuery: ${e}`, 'error');
             };
         }
     }
@@ -305,41 +307,43 @@ class AS{
 
             );
         }catch(e){
-            console.error(e)
+            msg(`Falha ao construir ícone de dados do script: ${e}`,'error');
         }
     }
     getSeparador(npg = 0, total = 0){
         if(total > 0){
-            let sep = $(`a[href='#separador_${npg}']`), pag = this.pages;
-            if(sep.length)sep.show();
-            else{
-                $('.pagination').append(
-                    $('<li />').addClass('page-item').append(
-                        $('<a />').addClass("page-link").attr({'href':`#separador_${npg}`, 'data-original-title':`Página ${npg}`, 'title': npg}).css({'display': 'block'}).append($('<b />').text(npg))
+            try{
+                let sep = $(`a[href='#separador_${npg}']`), pag = this.pages;
+                if(sep.length)sep.show();
+                else{
+                    $('.pagination').append(
+                        $('<li />').addClass('page-item').append(
+                            $('<a />').addClass("page-link").attr({'href':`#separador_${npg}`, 'data-original-title':`Página ${npg}`, 'title': npg}).css({'display': 'block'}).append($('<b />').text(npg))
+                        )
                     )
+                }
+                return $('<li />', {'id': `separador_${npg}`})
+                    .addClass(`separador_pagina-${npg} separador_pagina list-group-item dark-gray`)
+                    .append(
+                    `Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`
                 )
+                .css({
+                    'text-align':'right',
+                    'margin-right': '-15px',
+                    //'text-decoration': 'underline',
+                    'cursor': 'pointer',
+                    'padding-right': '.5em'
+                });
+            }catch(e){
+                throw new Error(`Falha ao atualizar barra de paginação: ${e}`);
+                return false;
             }
-            return $('<li />', {'id': `separador_${npg}`})
-            .addClass(`separador_pagina-${npg} separador_pagina list-group-item dark-gray`)
-            .append(
-                `Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`
-            )
-            .css({
-                'text-align':'right',
-                'margin-right': '-15px',
-                //'text-decoration': 'underline',
-                'cursor': 'pointer',
-                'padding-right': '.5em'
-            });
         }else return false;
     }
     getIDuser(){
-        try{
-            var userID = parseFloat(/(id=)(.*)(&)/.exec($("a[href^='account-details.php']").attr('href'))[2]);
-            if(!isNaN(userID) && (typeof userID !== 'undefined') && userID > 0)return userID;
-            else throw new Error(this.lang.get_user_no);
-        }catch(e){
-        }
+        var userID = parseFloat(/(id=)(.*)(&)/.exec($("a[href^='account-details.php']").attr('href'))[2]);
+        if(!isNaN(userID) && (typeof userID !== 'undefined') && userID > 0)return userID;
+        else throw new Error(this.lang.get_user_no);
     }
     getTotalPages(){
         return $('.pagination li a.page-link').map(function(){ if( vlr = parseInt(this.innerText) > 0) return vlr; }).length;
@@ -366,23 +370,27 @@ class AS{
         }
     }
     setPaginacao(npg){
-        $('.pagination').css({
-            'position': 'fixed',
-            'bottom': '0',
-            'z-index': '9',
-            'width': '72%',
-            'display': 'flex',
-            'flex-wrap': 'wrap-reverse',
-            'align-items': 'stretch'
-        }).find('a.page-link').each(function(i, a){
-            if($(a).attr('data-original-title') !== "Próximo" && $(a).attr('data-original-title') !== "Anterior"){
-                $(a).attr({'href':`#separador_${i}`, 'data-original-title': `Página ${i}`}).html( $('<b />').text(i) ).hide();
-            }else $(a).remove();
-        }).on("click", function(){
-            let n = $(this).text();
-            $('.pagination').find('li').removeClass('active');
-            $(`a[href='#separador_${n}']`).closest('li').addClass('page-item active');
-        });
+        try{
+            $('.pagination').css({
+                'position': 'fixed',
+                'bottom': '0',
+                'z-index': '9',
+                'width': '72%',
+                'display': 'flex',
+                'flex-wrap': 'wrap-reverse',
+                'align-items': 'stretch'
+            }).find('a.page-link').each(function(i, a){
+                if($(a).attr('data-original-title') !== "Próximo" && $(a).attr('data-original-title') !== "Anterior"){
+                    $(a).attr({'href':`#separador_${i}`, 'data-original-title': `Página ${i}`}).html( $('<b />').text(i) ).hide();
+                }else $(a).remove();
+            }).on("click", function(){
+                let n = $(this).text();
+                $('.pagination').find('li').removeClass('active');
+                $(`a[href='#separador_${n}']`).closest('li').addClass('page-item active');
+            });
+        }catch(e){
+            throw new Error(`Erro ao reorganizar barra de paginação: ${e}`);
+        }
     }
 
     callAjaxPages(page){
@@ -391,60 +399,72 @@ class AS{
 
             this.setPaginacao(page);
 
-            call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
-                let carregado = $('ul.list-group li').length -1;
-                let separador = call.getSeparador(1, carregado);
-                if(separador){
-                    $('body').find('ul.list-group li:first').before( separador )
-                    npg++;
-                }
-                $('.hkb-loading').remove();
-                wait = false; npg = _npg; lidos = _lidos;
-            });
+            try{
+                call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
+                    let carregado = $('ul.list-group li').length -1;
+                    let separador = call.getSeparador(1, carregado);
+                    if(separador){
+                        $('body').find('ul.list-group li:first').before( separador )
+                        npg++;
+                    }
+                    $('.hkb-loading').remove();
+                    wait = false; npg = _npg; lidos = _lidos;
+                });
+            }catch(e){
+                throw new Error(`Falha ao criar separador inicial: ${e}`);
+            }
 
             let lastScrollTop = $(window).scrollTop();
             $(window).scroll(function() {
                 //efeitos da nova paginação
-                if( ( $(`li[class*='separador_pagina-']`).length && $(`a[href*='#separador_']`).length ) ){
-                    let currentScrollTop = $(window).scrollTop(),
-                        bar_pgPosAtual = $(`ul.pagination`).offset().top,
-                        last, hg = $(window).height();
-                    // Está a descer
-                    if (currentScrollTop > lastScrollTop)last = call.separadores.map(e => { if(e.posicionamento < lastScrollTop)return e.separador });
-                    // Está a subir
-                    else if (currentScrollTop < lastScrollTop)last = call.separadores.map(e => { if(e.posicionamento < lastScrollTop)return e.separador });
+                try{
+                    if( ( $(`li[class*='separador_pagina-']`).length && $(`a[href*='#separador_']`).length ) ){
+                        let currentScrollTop = $(window).scrollTop(),
+                            bar_pgPosAtual = $(`ul.pagination`).offset().top,
+                            last, hg = $(window).height();
+                        // Está a descer
+                        if (currentScrollTop > lastScrollTop)last = call.separadores.map(e => { if(e.posicionamento < lastScrollTop)return e.separador });
+                        // Está a subir
+                        else if (currentScrollTop < lastScrollTop)last = call.separadores.map(e => { if(e.posicionamento < lastScrollTop)return e.separador });
 
-                    lastScrollTop = currentScrollTop;
+                        lastScrollTop = currentScrollTop;
 
-                    let pag_npg = last.filter(Boolean).pop() ?? 1;//filtrando itens e pegando o ultimo
-                    $('a.page-link').closest('li').removeClass('active');
-                    $(`a[href='#separador_${pag_npg}']`).closest('li').addClass('page-item active');
+                        let pag_npg = last.filter(Boolean).pop() ?? 1;//filtrando itens e pegando o ultimo
+                        $('a.page-link').closest('li').removeClass('active');
+                        $(`a[href='#separador_${pag_npg}']`).closest('li').addClass('page-item active');
+                    }
+                }catch(e){
+                    throw new Error(`Erro ao criar efeitos na barra de paginação: ${e}`);
                 }
 
                 if ( $(document).height() - $(window).height() - 2 < $(window).scrollTop() ) {
-                    call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
-                        npg++;
-                        if( $('ul.pagination').length > 0 )$('a.page-link').closest('li').removeClass('active');
-                        $(`a[href='#separador_${npg}']`).closest('li').addClass('page-item active');
+                    try{
+                        call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
+                            npg++;
+                            if( $('ul.pagination').length > 0 )$('a.page-link').closest('li').removeClass('active');
+                            $(`a[href='#separador_${npg}']`).closest('li').addClass('page-item active');
 
-                        let total_carregados = $(_html).find('ul.list-group li').length;
-                        let separador = call.getSeparador(npg, total_carregados);
-                        if(separador){
-                            let conteudo = $(_html).find('ul.list-group li');
+                            let total_carregados = $(_html).find('ul.list-group li').length;
+                            let separador = call.getSeparador(npg, total_carregados);
+                            if(separador){
+                                let conteudo = $(_html).find('ul.list-group li');
 
-                            $('body').find('.list-group li:last').after( separador, conteudo);
+                                $('body').find('.list-group li:last').after( separador, conteudo);
 
-                            call.separadores.push({
-                                'separador': npg,
-                                'id': `separador_${npg}`,
-                                'class' : `separador_pagina-${npg}`,
-                                'posicionamento': separador.offset().top
-                            });
-                        }
-                        $('.hkb-loading').remove();
+                                call.separadores.push({
+                                    'separador': npg,
+                                    'id': `separador_${npg}`,
+                                    'class' : `separador_pagina-${npg}`,
+                                    'posicionamento': separador.offset().top
+                                });
+                            }
+                            $('.hkb-loading').remove();
 
-                        wait = false; npg = _npg; lidos = _lidos;
-                    });
+                            wait = false; npg = _npg; lidos = _lidos;
+                        });
+                    }catch(e){
+                        throw new Error(`Falha ao carregar conteúdo: ${e}`);
+                    }
                 }
             });
 
@@ -475,9 +495,9 @@ class AS{
                             lidos.push(npg);
                             npg++;
 
-                            let url = window.location.href.concat(`&page=${npg}`);
+                            let url = window.location.href;
                             $.ajax({
-                                'url':  url,
+                                'url': (/\?/.test(url))?url.concat(`&page=${npg}`):url.concat(`?page=${npg}`),
                                 'dataType': 'html',
                                 'success': function(html) {
                                     resolve([html, npg, wait, lidos])
