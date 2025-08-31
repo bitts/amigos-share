@@ -325,7 +325,7 @@ class AS{
                         $('<li />').addClass('page-item').append(
                             $('<a />').addClass("page-link").attr({'href':`#separador_${npg}`, 'data-original-title':`Página ${npg}`, 'title': npg}).css({'display': 'block'}).append($('<b />').text(npg))
                         )
-                    )
+                    );
                 }
                 if( $('ul.list-group li').length ){
                     return $('<li />', {'id': `separador_${npg}`})
@@ -434,7 +434,7 @@ class AS{
 
                         lastScrollTop = currentScrollTop;
 
-                        let pag_npg = last.filter(Boolean).pop() ?? 1;//filtrando itens e pegando o ultimo
+                        let pag_npg = last.filter(Boolean).pop() || 1;//filtrando itens e pegando o ultimo
                         $('a.page-link').closest('li').removeClass('active');
                         $(`a[href='#separador_${pag_npg}']`).closest('li').addClass('page-item active');
                     }
@@ -449,8 +449,10 @@ class AS{
                             if( $('ul.pagination').length > 0 )$('a.page-link').closest('li').removeClass('active');
                             $(`a[href='#separador_${npg}']`).closest('li').addClass('page-item active');
 
-                            let total_carregados = $(_html).find('ul.list-group li').length || $(_html).find('table').children().length;
-                            let separador = call.getSeparador(npg, total_carregados);
+                            let carregados_li = $(_html).find('ul.list-group li').length;
+                            let carregados_tr = $(_html).find('table:first tbody tr').length ;
+                            let separador = call.getSeparador(npg, (carregados_li ? carregados_li -1 : carregados_tr));
+
                             if(separador){
                                 try{
                                     let conteudo_li = $(_html).find('ul.list-group li');
