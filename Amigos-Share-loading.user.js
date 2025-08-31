@@ -316,7 +316,7 @@ class AS{
         }
     }
     getSeparador(npg = 0, total = 0){
-        if(total > 0){
+        if(total > 0 && npg <= this.pages){
             try{
                 let sep = $(`a[href='#separador_${npg}']`), pag = this.pages;
                 if(sep.length)sep.show();
@@ -327,18 +327,19 @@ class AS{
                         )
                     )
                 }
-                return $('<li />', {'id': `separador_${npg}`})
-                    .addClass(`separador_pagina-${npg} separador_pagina list-group-item dark-gray`)
-                    .append(
-                    `Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`
-                )
-                .css({
-                    'text-align':'right',
-                    'margin-right': '-15px',
-                    //'text-decoration': 'underline',
-                    'cursor': 'pointer',
-                    'padding-right': '.5em'
-                });
+                if( $('ul.list-group li').length ){
+                    return $('<li />', {'id': `separador_${npg}`})
+                        .addClass(`separador_pagina-${npg} separador_pagina list-group-item dark-gray`)
+                        .append(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`)
+                        .css({'text-align':'right','margin-right': '-15px','cursor': 'pointer','padding-right': '.5em'});
+                }else if( $('table').length ){
+                    total--;
+                    return $('<tbody />').append(
+                        $('<tr />', {'id': `separador_${npg}`})
+                        .addClass(`separador_pagina-${npg} separador_pagina`)
+                        .append( $('<td />',{'colspan':'10'}).css({'text-align':'right'}).html(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`) )
+                    );
+                }
             }catch(e){
                 throw new Error(`Falha ao atualizar barra de paginação: ${e}`);
                 return false;
@@ -404,10 +405,11 @@ class AS{
             this.setPaginacao();
             try{
                 call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
-                    let carregado = $('ul.list-group li').length -1;
-                    let separador = call.getSeparador(1, carregado);
+                    let carregados_li = $('ul.list-group li').length;
+                    let carregados_tr = $('table:first tbody tr').length ;
+                    let separador = call.getSeparador(1, (carregados_li ? carregados_li -1 : carregados_tr));
                     if(separador){
-                        $('body').find('ul.list-group li:first').before( separador );
+                        $('body').find('ul.list-group li:first, table:first tbody:first').before( separador );
                         npg++;
                     }
                     $('.hkb-loading').remove();
@@ -421,7 +423,7 @@ class AS{
             $(window).scroll(function() {
                 //efeitos da nova paginação
                 try{
-                    if( ( $(`li[class*='separador_pagina-']`).length && $(`a[href*='#separador_']`).length ) ){
+                    if( ( $(`[class*='separador_pagina-']`).length && $(`a[href*='#separador_']`).length ) ){
                         let currentScrollTop = $(window).scrollTop(),
                             bar_pgPosAtual = $(`ul.pagination`).offset().top,
                             last, hg = $(window).height();
@@ -447,12 +449,24 @@ class AS{
                             if( $('ul.pagination').length > 0 )$('a.page-link').closest('li').removeClass('active');
                             $(`a[href='#separador_${npg}']`).closest('li').addClass('page-item active');
 
-                            let total_carregados = $(_html).find('ul.list-group li').length;
+                            let total_carregados = $(_html).find('ul.list-group li').length || $(_html).find('table').children().length;
                             let separador = call.getSeparador(npg, total_carregados);
                             if(separador){
-                                let conteudo = $(_html).find('ul.list-group li');
+                                try{
+                                    let conteudo_li = $(_html).find('ul.list-group li');
+                                    $('body').find('.list-group li:last').after( separador, conteudo_li);
+                                }catch(e){
+                                }
 
-                                $('body').find('.list-group li:last').after( separador, conteudo);
+                                try{
+                                    let conteudo_tr = $(_html).find('table tbody');
+                                    let last = null;
+                                    $('table:first').children().map(function(){ last = $(this); });
+                                    let tag = $('body').find($(last)).prop("tagName").toLowerCase();
+                                    let tds = $(last).find('td').length;
+                                    $('body').find($(last)).after( separador, conteudo_tr );
+                                }catch(e){
+                                }
 
                                 call.separadores.push({
                                     'separador': npg,
@@ -483,8 +497,7 @@ class AS{
                     if(page > 0){
                         if(npg <= page && !lidos.includes(npg) && !wait){
                             wait = true;
-                            let load = $('<li />').addClass(`hkb-loading list-group-item dark-gray`).append(
-                                $('<div />').addClass(`list-group-item-addon list-group-item-content`)
+                            let load_icon = $('<div />').addClass(`list-group-item-addon list-group-item-content`)
                                 .css({
                                     'background-image': load_image,
                                     'background-size': 'contain',
@@ -492,13 +505,29 @@ class AS{
                                     'background-position': 'center',
                                     'padding': '1em'
                                 })
-                            );
-                            ths.find('.list-group li:last').after(load);
+                            if( ths.find('.list-group li').length )
+                                ths.find('.list-group li:last').after( $('<li />').addClass('hkb-loading list-group-item dark-gray').append(load_icon) );
+                            if( $('table:first').length ){
+                                let last = null;
+                                $('table:first').children().map(function(){ last = $(this); });
+                                let tag = $('body').find($(last)).prop("tagName").toLowerCase();
+                                let tds = $(last).find('td').length;
+
+                                $('body').find($(last)).after( $(`<${tag} />`).addClass('hkb-loading').append(
+                                    $('<tr />').append(
+                                        $('<td />',{'colspan': tds}).append(load_icon)
+                                    )
+                                ) );
+                            }
 
                             lidos.push(npg);
                             npg++;
 
                             let url = window.location.href;
+                            if(/log.php/.test(window.location.href)){
+                                url += '&keywords='+ encodeURIComponent( $("input[name='keywords']").val() );
+                            }
+
                             $.ajax({
                                 'url': (/\?/.test(url))?url.concat(`&page=${npg}`):url.concat(`?page=${npg}`),
                                 'dataType': 'html',
