@@ -227,7 +227,7 @@ class CheckUpdate{
     }
 }
 
-class AS{
+class ASL{
 
     constructor() {
         this.about = {
@@ -241,7 +241,7 @@ class AS{
                 '21/07/2025': 'Melhorias no Ajax Scroll Content para todas as páginas que exibem alguma paginação.',
                 '22/07/2025': 'Verificação de atualizações do script.',
                 '20/08/2025': 'Adição de barra indicadora de distribuição das páginas carregadas e alteração das URLs da barra de paginação para referência as barras indicadoras.',
-                '28/08/2025': 'Diversas melhorias conforme sugestões realizadas no <b><a href="https://cliente.amigos-share.club/forum.php?action=ver_topico&id=1578">fórum</a></b> entre elas melhorias na paginação com substituição dos links e textos que agora referenciam a própria página no marcador criado, além de efeitos visuais na barra de paginação ao executar a rolagem.'
+                '28/08/2025': 'Diversas melhorias conforme sugestões realizadas no <b><a href="https://cliente.amigos-share.club/forum.php?action=ver_topico&id=1578">fórum</a></b> entre elas adicionado o carregamento automático para todas as páginas que possuem a ocorrência de paginação, substituindo sua ação pra referenciar a barra separadora de conteúdo carregado e presente na própria página, além de efeitos visuais na barra de paginação.'
             }
         }
         this.icone = 'https://amigos-share.club/favicon.ico';
@@ -319,6 +319,7 @@ class AS{
         if(total > 0 && npg <= this.pages){
             try{
                 let sep = $(`a[href='#separador_${npg}']`), pag = this.pages;
+
                 if(sep.length)sep.show();
                 else{
                     $('.pagination').append(
@@ -327,18 +328,28 @@ class AS{
                         )
                     );
                 }
+
                 if( $('ul.list-group li').length ){
                     return $('<li />', {'id': `separador_${npg}`})
-                        .addClass(`separador_pagina-${npg} separador_pagina list-group-item dark-gray`)
+                        .addClass(`separador_pagina-${npg} separador_pagina list-group-item bg-primary`)
                         .append(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`)
                         .css({'text-align':'right','margin-right': '-15px','cursor': 'pointer','padding-right': '.5em'});
-                }else if( $('table').length ){
-                    total--;
-                    return $('<tbody />').append(
-                        $('<tr />', {'id': `separador_${npg}`})
-                        .addClass(`separador_pagina-${npg} separador_pagina`)
-                        .append( $('<td />',{'colspan':'10'}).css({'text-align':'right'}).html(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`) )
+                }
+                if( $('.card-header').text().includes('Comentários') ){
+                    return $('<div />').addClass('row').append(
+                        $('<div />', {'id': `separador_${npg}`})
+                        .addClass(`separador_pagina-${npg} separador_pagina text-right bg-primary`)
+                        .css({'width': '100%','padding-right':'2%'})
+                        .html(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`)
                     );
+                }
+                if( $('.card-header').text().includes('Site Log') ){
+                    return $('<tr />', {'id': `separador_${npg}`}).append(
+                        $('<td />',{'colspan':'2'})
+                            .addClass(`separador_pagina-${npg} separador_pagina bg-primary`)
+                            .css({'width': '100%','padding-right':'2%','text-align':'right'})
+                            .html(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`)
+                        );
                 }
             }catch(e){
                 throw new Error(`Falha ao atualizar barra de paginação: ${e}`);
@@ -350,9 +361,6 @@ class AS{
         var userID = parseFloat(/(id=)(.*)(&)/.exec($("a[href^='account-details.php']").attr('href'))[2]);
         if(!isNaN(userID) && (typeof userID !== 'undefined') && userID > 0)return userID;
         else throw new Error(this.lang.get_user_no);
-    }
-    getTotalPages(){
-        return parseInt($('.pagination li a.page-link').map(function(){ let vlr = 0; if( vlr = parseInt(this.innerText) > 0) return vlr; }).length -1);
     }
     getPagination(){
         try{
@@ -405,11 +413,19 @@ class AS{
             this.setPaginacao();
             try{
                 call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
-                    let carregados_li = $('ul.list-group li').length;
-                    let carregados_tr = $('table:first tbody tr').length ;
-                    let separador = call.getSeparador(1, (carregados_li ? carregados_li -1 : carregados_tr));
+                    let carregados = $(`
+                    h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty),
+                    div.card:contains('Site Log') > div.card-body > .table > tbody > tr:not(:first-of-type),
+                    ul.list-group li
+                    `).length -1;
+
+                    let separador = call.getSeparador(1, carregados);
                     if(separador){
-                        $('body').find('ul.list-group li:first, table:first tbody:first').before( separador );
+                        $('body').find(`
+                        h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty):first,
+                        div.card:contains('Site Log') > div.card-body > .table > tbody > tr:nth-child(2),
+                        ul.list-group li:first
+                        `).before( separador );
                         npg++;
                     }
                     $('.hkb-loading').remove();
@@ -434,7 +450,7 @@ class AS{
 
                         lastScrollTop = currentScrollTop;
 
-                        let pag_npg = last.filter(Boolean).pop() || 1;//filtrando itens e pegando o ultimo
+                        let pag_npg = last?last.filter(Boolean).pop() : 1;//filtrando itens e pegando o ultimo
                         $('a.page-link').closest('li').removeClass('active');
                         $(`a[href='#separador_${pag_npg}']`).closest('li').addClass('page-item active');
                     }
@@ -449,26 +465,19 @@ class AS{
                             if( $('ul.pagination').length > 0 )$('a.page-link').closest('li').removeClass('active');
                             $(`a[href='#separador_${npg}']`).closest('li').addClass('page-item active');
 
-                            let carregados_li = $(_html).find('ul.list-group li').length;
-                            let carregados_tr = $(_html).find('table:first tbody tr').length ;
-                            let separador = call.getSeparador(npg, (carregados_li ? carregados_li -1 : carregados_tr));
+                            let carregados = $(_html).find(`
+                            h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty),
+                            div.card:contains('Site Log') > div.card-body > .table > tbody > tr:has(td:not(:empty)):not(:first-of-type),
+                            ul.list-group li
+                            `);
 
+                            let separador = call.getSeparador(npg, carregados.length);
                             if(separador){
-                                try{
-                                    let conteudo_li = $(_html).find('ul.list-group li');
-                                    $('body').find('.list-group li:last').after( separador, conteudo_li);
-                                }catch(e){
-                                }
-
-                                try{
-                                    let conteudo_tr = $(_html).find('table tbody');
-                                    let last = null;
-                                    $('table:first').children().map(function(){ last = $(this); });
-                                    let tag = $('body').find($(last)).prop("tagName").toLowerCase();
-                                    let tds = $(last).find('td').length;
-                                    $('body').find($(last)).after( separador, conteudo_tr );
-                                }catch(e){
-                                }
+                                $('html').find(`
+                                    h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty):last,
+                                    div.card:contains('Site Log') > div.card-body > .table > tbody > tr:has(td:not(:empty)):last,
+                                    ul.list-group li:last
+                                 `).after( separador, carregados );
 
                                 call.separadores.push({
                                     'separador': npg,
@@ -506,32 +515,44 @@ class AS{
                                     'background-repeat': 'no-repeat',
                                     'background-position': 'center',
                                     'padding': '1em'
-                                })
-                            if( ths.find('.list-group li').length )
-                                ths.find('.list-group li:last').after( $('<li />').addClass('hkb-loading list-group-item dark-gray').append(load_icon) );
-                            if( $('table:first').length ){
-                                let last = null;
-                                $('table:first').children().map(function(){ last = $(this); });
-                                let tag = $('body').find($(last)).prop("tagName").toLowerCase();
-                                let tds = $(last).find('td').length;
+                                });
 
-                                $('body').find($(last)).after( $(`<${tag} />`).addClass('hkb-loading').append(
-                                    $('<tr />').append(
-                                        $('<td />',{'colspan': tds}).append(load_icon)
+                            if( ths.find(`h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty)`).length ){
+                                ths.find(`h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty):last`).after(
+                                    $('<div />').addClass('row').append(
+                                        $('<div />').addClass('hkb-loading dark-gray bg-forum text-center').css({'width': '100%','padding-right':'2%'}).append(load_icon)
                                     )
-                                ) );
+                                );
+                            }else if( ths.find(`div.card:contains('Site Log') > div.card-body > .table > tbody > tr:has(td:not(:empty))`).length ){
+                                ths.find(`div.card:contains('Site Log') > div.card-body > .table > tbody > tr:has(td:not(:empty)):last`).after(
+                                    $('<tr />').append(
+                                        $('<td />', {'colspan':'2'}).append(
+                                            $('<div />').addClass('hkb-loading dark-gray text-center').css({'width': '100%','padding-right':'2%'}).append(load_icon)
+                                        )
+                                    )
+                                );
+                            }else if( ths.find(`ul.list-group li`).length ){
+                                ths.find(`ul.list-group li:last`).after(
+                                    $('<li />').addClass('hkb-loading list-group-item dark-gray').append(load_icon)
+                                );
                             }
 
                             lidos.push(npg);
                             npg++;
 
                             let url = window.location.href;
-                            if(/log.php/.test(window.location.href)){
-                                url += '&keywords='+ encodeURIComponent( $("input[name='keywords']").val() );
+                            if(/log.php/.test(url) && $("input[name='keywords']").val() !== ""){
+                                let search = 'keywords='+ encodeURIComponent( $("input[name='keywords']").val() );
+                                url = (/\?/.test(url))?url.concat(`&${search}`):url.concat(`?${search}`);
                             }
-
+                            if(/separador/.test(url))url = url.replace(/#separador_\d+/g, '');
+                            if(/page/.test(url)){
+                                url = url.replace(/page\d+/g, '').concat(`page=${npg}`);
+                            }else {
+                                url = (/\?/.test(url))?url.concat(`&page=${npg}`):url.concat(`?page=${npg}`);
+                            }
                             $.ajax({
-                                'url': (/\?/.test(url))?url.concat(`&page=${npg}`):url.concat(`?page=${npg}`),
+                                'url': url,
                                 'dataType': 'html',
                                 'success': function(html) {
                                     resolve([html, npg, wait, lidos])
@@ -553,5 +574,5 @@ class AS{
     'use strict';
 
     try{ new CheckUpdate();} catch (e){ console.error(`Erro ao verificar por atualizações.`, e); }
-    try{ new AS(); } catch(e){ console.error(`Erro ao executar script.`, e); }
+    try{ new ASL(); } catch(e){ console.error(`Erro ao executar script.`, e); }
 })();
