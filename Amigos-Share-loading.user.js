@@ -12,7 +12,7 @@
 // @icon         https://amigos-share.club/favicon.ico
 // @include      https://cliente.amigos-share.club/*
 // @run-at       document-start
-// @version      2.1.0
+// @version      2.1.1
 // @license      MIT; https://opensource.org/licenses/MIT
 // @noframes
 // @grant        GM_xmlhttpRequest
@@ -324,7 +324,7 @@ class AS{
 
     callAjaxPages(page){
         if(page > 0){
-            var npg = 0, wait = false, lidos = new Array(), call = this;
+            var npg = 0, wait = false, lidos = new Array(), call = this, AjusteScroll = -100;
 
             //ativando quando carregar uma página
             call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
@@ -337,7 +337,7 @@ class AS{
 
             //ativando quando no uso do scroll
             $(window).scroll(function() {
-                if ( $(document).height() - $(window).height() - 2 < $(window).scrollTop() ) {
+                if ( $(document).height() - $(window).height() + AjusteScroll < $(window).scrollTop() ) {
                     call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
                         $(_html).find('ul.list-group li').each(function(){
                             $('body').find('.list-group li:last').after($(this));
