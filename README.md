@@ -32,7 +32,7 @@ O que é Tampermonkey:
 Permite que você instale, gerencie e execute scripts de usuário em suas páginas web. 
 
 O que é o Violentmonkey:
-É uma extensão de código aberto que oferece suporte a scripts de usuário em navegadores com suporte a WebExtensions.É compatível com a maioria dos scripts de Greasemonkey e Tampermonkey.Possui recursos como atualização automática de scripts, execução ordenada de scripts, suporte a funções GM e sincronização com serviços como Dropbox e OneDrive. 
+É uma extensão de código aberto que oferece suporte a scripts de usuário em navegadores com suporte a WebExtensions. É compatível com a maioria dos scripts de Greasemonkey e Tampermonkey. Possui recursos como atualização automática e execução ordenada de scripts, suporte a funções GM e sincronização com Dropbox e OneDrive. 
 
 _________________________________________________________
 
@@ -40,5 +40,5 @@ _________________________________________________________
 
 * Imagem mostrando o carregamento via Ajax de novos conteúdos ```sem o carregamento total da página para isso```;
 
-* No exemplo é exibido o conteúdo da sexta página enquando é carregado o da sétima ```imagem é exibida```.
+* No exemplo é exibido a divisão entre terceira e quarta página (mostrando o total de páginas que existe para aquela busca) e os botões de paginação, que ficam fixa na página como o botão de "ir para o topo" e vão sendo construídos conforme é rolado e carregado novas páginas.
 
