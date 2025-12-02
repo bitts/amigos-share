@@ -11,14 +11,14 @@
 // @icon         https://amigos-share.club/favicon.ico
 // @include      https://cliente.amigos-share.club/*
 // @run-at       document-start
-// @version      2.2.0
+// @version      2.2.3
 // @license      MIT; https://opensource.org/licenses/MIT
 // @noframes
 // @grant        GM_xmlhttpRequest
 // @grant        GM_notification
 // @grant        GM_getValue
 // @grant        GM_setValue
-// @connect      raw.githubusercontent.com
+// @connect      openuserjs.org
 // ==/UserScript==
 
 var DEBUG = true;
@@ -234,14 +234,16 @@ class ASL{
             'author' : 'Bitts [https://github.com/bitts](mbitts.com)',
             'supportURL':'https://github.com/bitts/amigos-share/issues',
             'create':'2019-04-13',
-            'lastUpdate':'2025-08-28',
+            'lastUpdate':'2025-11-27',
             'name':'[ASC]',
             'description':'Amigos-Share page load ajax scroll content',
             'upgrades' : {
                 '21/07/2025': 'Melhorias no Ajax Scroll Content para todas as páginas que exibem alguma paginação.',
                 '22/07/2025': 'Verificação de atualizações do script.',
                 '20/08/2025': 'Adição de barra indicadora de distribuição das páginas carregadas e alteração das URLs da barra de paginação para referência as barras indicadoras.',
-                '28/08/2025': 'Diversas melhorias conforme sugestões realizadas no <b><a href="https://cliente.amigos-share.club/forum.php?action=ver_topico&id=1578">fórum</a></b> entre elas adicionado o carregamento automático para todas as páginas que possuem a ocorrência de paginação, substituindo sua ação pra referenciar a barra separadora de conteúdo carregado e presente na própria página, além de efeitos visuais na barra de paginação.'
+                '28/08/2025': 'Diversas melhorias conforme sugestões realizadas no <b><a href="https://cliente.amigos-share.club/forum.php?action=ver_topico&id=1578">fórum</a></b> entre elas adicionado o carregamento automático para todas as páginas que possuem a ocorrência de paginação, substituindo sua ação pra referenciar a barra separadora de conteúdo carregado e presente na própria página, além de efeitos visuais na barra de paginação.',
+                '09/09/2025': 'Pequeno ajuste para funcionamento correto no Firefox do Android que permite instalar plugins para aplicar este script',
+                '01/12/2025': 'Correções para o funcionamento quando na exibição da listagem por capas'
             }
         }
         this.icone = 'https://amigos-share.club/favicon.ico';
@@ -253,33 +255,18 @@ class ASL{
         this.separadores = [];
         var th = this;
 
-        th.getJquery(function(){
-            setTimeout(function() {
-                th.getAbout();
-                th.pages = th.getPagination();
-                try{
-                    th.callAjaxPages( th.pages );
-                }catch(e){
-                    msg(e, 'error');
-                }
-            }, 2000);
+        setTimeout(function() {
+            th.getAbout();
+            th.pages = th.getPagination();
+            th.setPaginacao();
+            try{
+                th.callAjaxPages( th.pages );
+            }catch(e){
+                msg(e, 'error');
+            }
+        }, 2000);
 
-            //let user = th.getIDuser();
-        });
-    }
-    getJquery(executar){
-        if (typeof window.jQuery === typeof undefined || !window.jQuery) {
-            // jQuery não está carregado, então vamos incluí-lo.
-            var script = document.createElement('script');
-            script.src = this.jquery; // URL da CDN do jQuery
-            document.head.appendChild(script);
-
-            script.onload = executar;
-
-            script.onerror = function() {
-                msg(`Falha ao carregar jQuery: ${e}`, 'error');
-            };
-        }
+        //let user = th.getIDuser();
     }
     getAbout(){
         try{
@@ -351,6 +338,13 @@ class ASL{
                             .html(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`)
                         );
                 }
+                if( $('div.container_capas') ){
+                    return $('<div />').addClass('col-xl-1').css({'margin':'1em 0 1em 0'}).append(
+                        $('<div />', {'id': `separador_${npg}`})
+                        .addClass(`separador_pagina-${npg} separador_pagina text-center bg-primary`)
+                        .html(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`)
+                    );
+                }
             }catch(e){
                 throw new Error(`Falha ao atualizar barra de paginação: ${e}`);
                 return false;
@@ -409,14 +403,14 @@ class ASL{
 
     callAjaxPages(page){
         if(page > 0){
-            var npg = 0, wait = false, lidos = new Array(), call = this;
-            this.setPaginacao();
+            var npg = 0, wait = false, lidos = new Array(), call = this, scrollAjuste = -100, lastScrollTop = $(window).scrollTop();
+
             try{
                 call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
                     let carregados = $(`
                     h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty),
                     div.card:contains('Site Log') > div.card-body > .table > tbody > tr:not(:first-of-type),
-                    ul.list-group li
+                    ul.list-group li, div.container_capas > div
                     `).length -1;
 
                     let separador = call.getSeparador(1, carregados);
@@ -424,7 +418,7 @@ class ASL{
                         $('body').find(`
                         h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty):first,
                         div.card:contains('Site Log') > div.card-body > .table > tbody > tr:nth-child(2),
-                        ul.list-group li:first
+                        ul.list-group li:first, div.container_capas > div:first
                         `).before( separador );
                         npg++;
                     }
@@ -435,7 +429,6 @@ class ASL{
                 throw new Error(`Falha ao criar separador inicial: ${e}`);
             }
 
-            let lastScrollTop = $(window).scrollTop();
             $(window).scroll(function() {
                 //efeitos da nova paginação
                 try{
@@ -458,7 +451,7 @@ class ASL{
                     throw new Error(`Erro ao criar efeitos na barra de paginação: ${e}`);
                 }
 
-                if ( $(document).height() - $(window).height() - 2 < $(window).scrollTop() ) {
+                if ( $(document).height() - $(window).height() + scrollAjuste < $(window).scrollTop() ) {
                     try{
                         call.loadAjaxPagition(page, npg, wait, lidos).then(([_html, _npg, _wait, _lidos]) => {
                             npg++;
@@ -468,7 +461,7 @@ class ASL{
                             let carregados = $(_html).find(`
                             h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty),
                             div.card:contains('Site Log') > div.card-body > .table > tbody > tr:has(td:not(:empty)):not(:first-of-type),
-                            ul.list-group li
+                            ul.list-group li, div.container_capas > div
                             `);
 
                             let separador = call.getSeparador(npg, carregados.length);
@@ -476,7 +469,7 @@ class ASL{
                                 $('html').find(`
                                     h5.card-header:contains('Comentários') + div.card-body div.row:not(:empty):last,
                                     div.card:contains('Site Log') > div.card-body > .table > tbody > tr:has(td:not(:empty)):last,
-                                    ul.list-group li:last
+                                    ul.list-group li:last, div.container_capas > div:last
                                  `).after( separador, carregados );
 
                                 call.separadores.push({
@@ -535,6 +528,10 @@ class ASL{
                                 ths.find(`ul.list-group li:last`).after(
                                     $('<li />').addClass('hkb-loading list-group-item dark-gray').append(load_icon)
                                 );
+                            }else if ( ths.find(`div.container_capas > div`).length ){
+                                ths.find(`div.container_capas > div:last`).after(
+                                    $('<div />').addClass('hkb-loading dark-gray text-center').css({'width': '100%','padding-right':'2%'}).append(load_icon)
+                                );
                             }
 
                             lidos.push(npg);
@@ -547,7 +544,7 @@ class ASL{
                             }
                             if(/separador/.test(url))url = url.replace(/#separador_\d+/g, '');
                             if(/page/.test(url)){
-                                url = url.replace(/page\d+/g, '').concat(`page=${npg}`);
+                                url = url.replace(/([?&]page=)\d+/g, `$1${npg}`);
                             }else {
                                 url = (/\?/.test(url))?url.concat(`&page=${npg}`):url.concat(`?page=${npg}`);
                             }
