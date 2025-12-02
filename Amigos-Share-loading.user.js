@@ -339,7 +339,7 @@ class ASL{
                         );
                 }
                 if( $('div.container_capas') ){
-                    return $('<div />').addClass('col-xl-1').css({'margin':'1em 0 1em 0'}).append(
+                    return $('<div />').addClass('w-100').css({'margin':'1em 0 1em 0'}).append(
                         $('<div />', {'id': `separador_${npg}`})
                         .addClass(`separador_pagina-${npg} separador_pagina text-center bg-primary`)
                         .html(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`)
