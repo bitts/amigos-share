@@ -42,3 +42,12 @@ _________________________________________________________
 
 * No exemplo é exibido a divisão entre terceira e quarta página (mostrando o total de páginas que existe para aquela busca) e os botões de paginação, que ficam fixa na página como o botão de "ir para o topo" e vão sendo construídos conforme é rolado e carregado novas páginas.
 
+_________________________________________________________
+
+![Exemplo de carregamento modo Capa](https://github.com/user-attachments/assets/f4111dc5-12aa-4738-b2c0-009d98808ff0)
+
+* Imagem mostrando o carregamento via Ajax para exibição no estilo "Capa".
+
+* No exemplo é exibido a divisão entre segunda e terceira página (mostrando o total de páginas como oito, sendo exibido nove itens) e os botões de paginação, que ficam fixa na página como o botão de "ir para o topo" e vão sendo construídos conforme é rolado e carregado novas páginas.
+
+
