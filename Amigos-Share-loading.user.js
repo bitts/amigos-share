@@ -4,14 +4,15 @@
 // @author       Bitts [github.com/bitts](mbitts.com)
 // @copyright    2025, Bitts [github.com/bitts](mbitts.com)
 // @namespace    https://mbitts.com
-// @homepageURL  https://github.com/bitts/amigos-share
-// @supportURL   https://github.com/bitts/amigos-share/issues
+// @homepageURL  https://openuserjs.org/scripts/marcelo.valvassori/Amigos-Share-loading
+// @supportURL   https://openuserjs.org/scripts/marcelo.valvassori/Amigos-Share-loading/issues
 // @updateURL    https://openuserjs.org/install/marcelo.valvassori/Amigos-Share-loading.user.js
 // @downloadURL  https://openuserjs.org/install/marcelo.valvassori/Amigos-Share-loading.user.js
 // @icon         https://amigos-share.club/favicon.ico
 // @include      https://cliente.amigos-share.club/*
+// @match        https://cliente.amigos-share.club/*
 // @run-at       document-start
-// @version      2.2.3
+// @version      2.2.4
 // @license      MIT; https://opensource.org/licenses/MIT
 // @noframes
 // @grant        GM_xmlhttpRequest
@@ -231,8 +232,10 @@ class ASL{
 
     constructor() {
         this.about = {
-            'author' : 'Bitts [https://github.com/bitts](mbitts.com)',
-            'supportURL':'https://github.com/bitts/amigos-share/issues',
+            'author' : 'Bitts',
+            'github' : 'https://github.com/bitts',
+            'site' : 'https://mbitts.com',
+            'supportURL':'https://openuserjs.org/scripts/marcelo.valvassori/Amigos-Share-loading/issues',
             'create':'2019-04-13',
             'lastUpdate':'2025-11-27',
             'name':'[ASC]',
@@ -241,9 +244,11 @@ class ASL{
                 '21/07/2025': 'Melhorias no Ajax Scroll Content para todas as páginas que exibem alguma paginação.',
                 '22/07/2025': 'Verificação de atualizações do script.',
                 '20/08/2025': 'Adição de barra indicadora de distribuição das páginas carregadas e alteração das URLs da barra de paginação para referência as barras indicadoras.',
-                '28/08/2025': 'Diversas melhorias conforme sugestões realizadas no <b><a href="https://cliente.amigos-share.club/forum.php?action=ver_topico&id=1578">fórum</a></b> entre elas adicionado o carregamento automático para todas as páginas que possuem a ocorrência de paginação, substituindo sua ação pra referenciar a barra separadora de conteúdo carregado e presente na própria página, além de efeitos visuais na barra de paginação.',
+                '28/08/2025': 'Diversas melhorias conforme sugestões realizadas no <b><a href="https://cliente.amigos-share.club/forum.php?action=ver_topico&id=1578">fórum</a></b> entre elas adicionado o carregamento automático para todas as páginas que possuem a ocorrência de paginação, substituindo-a por uma barra separadora indicando o número da página e o total delas, bem como a quantidade de itens listados por página, além de efeitos visuais na ação.',
                 '09/09/2025': 'Pequeno ajuste para funcionamento correto no Firefox do Android que permite instalar plugins para aplicar este script',
-                '01/12/2025': 'Correções para o funcionamento quando na exibição da listagem por capas'
+                '01/12/2025': 'Correções para o funcionamento quando na exibição da listagem por capas',
+                '04/04/2026': 'Melhorias na documentação no site <a href="https://openuserjs.org/scripts/marcelo.valvassori/Amigos-Share-loading>openuserjs.org</a>',
+                '': 'Melhorias nas exibição de detalhes do sistema e interface de configuração'
             }
         }
         this.icone = 'https://amigos-share.club/favicon.ico';
@@ -256,7 +261,6 @@ class ASL{
         var th = this;
 
         setTimeout(function() {
-            th.getAbout();
             th.pages = th.getPagination();
             th.setPaginacao();
             try{
@@ -264,11 +268,13 @@ class ASL{
             }catch(e){
                 msg(e, 'error');
             }
+            th.getAbout();
         }, 2000);
 
         //let user = th.getIDuser();
     }
     getAbout(){
+        var self = this;
         try{
             $('body').append(
                 $('<div />')
@@ -279,25 +285,63 @@ class ASL{
                     'border': '2px solid grey','border-radius': '50%','width':'25px','height':'25px','padding-top': '5px'
                 })
                 .append(
-                    $('<p />').text('B'),
-                    $('<span />').addClass('info bg-secondary rounded position-absolute')
-                    .css({'text-align': 'justify','line-height': '2','padding': '1em','width': '500px', 'font-size': '60%'})
-                    .append(
-                        $('<h4 />').css({'text-align':'center'}).text(this.about.description),
-                        $('<p />').css({'text-align':'center'}).text(`Criado por: ${this.about.author}`),
-                        $('<p />').append(
-                            'Suporte: ',
-                            $('<a />',{'href': this.about.supportURL}).text(this.about.supportURL)
-                        ),
-                        $('<br />'),
-                        $('<p />').text('Atualizações:'),
-                        $('<ul />').append(
-                            Object.entries(this.about.upgrades).map(udt => $('<li />').append(`[${udt[0]}] ${udt[1]}`))
-                        )
-                    )
+                    $('<p />').text('B').click(function(){
+                        if($('.cfg-plg-bitts').length == 0 ){
+                            $('body > div.container-fluid > div > div.col-sm-10.col-md-10.col-lg-10.p-2.mb-5').prepend(
+                                $('<div />').addClass("card cfg-plg-bitts").append(
+                                    $('<h5 />').addClass("card-header bg-primary").text('Configurações do Plugin').append(
+                                        $('<button />', {'alt':'Fechar', 'title':'Fechar', 'type':'button'}).addClass("btn btn-sm btn-info float-right m-0").append(
+                                            $('<i />').addClass('fas fa-times')
+                                        ).click(function(){
+                                            $(this).closest('.cfg-plg-bitts').remove()
+                                        })
+                                    ),
+                                    $('<div />').addClass("card-body").append(
+                                        $('<div />').addClass("row").append(
+                                            $('<form />').addClass('form-inline mb-3').append(
+                                                $('<span />').addClass('mr-sm-2').html('Ajuste da paginação: '),
+                                                $('<input />',{'type':'text', 'placeholder':'Informe um valor', 'name':'plg_ajuste'}).addClass('form-control mr-sm-0')
+                                            )
+                                        ),
+                                        $('<div />').addClass("row").append(
+                                            $('<a />', {'data-bs-toggle':'collapse','data-toggle':'collapse','href':'#conteudoCollapse','role':'button','aria-expanded':'false','aria-controls':'conteudoCollapse'}).addClass("btn btn-primary").text('Atualizações do Plugin'),
+                                            $('<div />',{'id':'conteudoCollapse'}).addClass('collapse').append(
+                                              $('<div />').addClass('card card-body').append(
+                                                  $('<div />').addClass("text-justify").append(
+                                                      $('<h4 />').css({'text-align':'center'}).text(self.about.description),
+                                                      $('<p />').css({'text-align':'center'}).html(`Criado por: ${self.about.author}`),
+                                                      $('<p />').append(
+                                                          'Suporte: ', $('<a />',{'href': self.about.supportURL}).text(self.about.supportURL),
+                                                      ),
+                                                      $('<p />').append(
+                                                          'Github: ', $('<a />',{'href': self.about.github}).text(self.about.github),
+                                                      ),
+                                                      $('<br />'),
+                                                      $('<p />').text('Atualizações:'),
+                                                      $('<ul />').addClass('list-group').append(
+                                                          Object.entries(self.about.upgrades).map(
+                                                              udt => $('<li />').addClass('list-group-item d-flex align-items-center').append(
+                                                                  $('<span />').addClass('font-weight-bold p-2').text(udt[0]),
+                                                                  $('<span />').addClass('text-muted').html(udt[1])
+                                                              )
+                                                          )
+                                                      )
+                                                  )
+                                              )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        }
+                        $('html, body').animate({
+                            scrollTop: ".cfg-plg-bitts"
+                        }, 800);
+                    })
                 )
-
             );
+
+
         }catch(e){
             msg(`Falha ao construir ícone de dados do script: ${e}`,'error');
         }
@@ -339,7 +383,7 @@ class ASL{
                         );
                 }
                 if( $('div.container_capas') ){
-                    return $('<div />').addClass('col-xl-1').css({'margin':'1em 0 1em 0'}).append(
+                    return $('<div />').addClass('w-100').css({'margin':'1em 0 1em 0'}).append(
                         $('<div />', {'id': `separador_${npg}`})
                         .addClass(`separador_pagina-${npg} separador_pagina text-center bg-primary`)
                         .html(`Página: <b>${npg}</b> de <b>${pag}</b> (Exibindo ${total} itens)`)
@@ -570,6 +614,6 @@ class ASL{
 (function() {
     'use strict';
 
-    try{ new CheckUpdate();} catch (e){ console.error(`Erro ao verificar por atualizações.`, e); }
+    try{ new CheckUpdate(); } catch (e){ console.error(`Erro ao verificar por atualizações.`, e); }
     try{ new ASL(); } catch(e){ console.error(`Erro ao executar script.`, e); }
 })();
