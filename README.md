@@ -159,8 +159,6 @@ O script será executado automaticamente 🎉
 
 # 📸 Exemplos visuais (screenshots)
 
-> 💡 Coloque as imagens dentro da pasta `/docs/images/`
-
 ## Instalar Tampermonkey
 ![Tampermonkey](https://raw.githubusercontent.com/wiki/OpenUserJS/OpenUserJS.org/images/tampermonkey1.png)
 
@@ -176,11 +174,18 @@ O script será executado automaticamente 🎉
 > Carregamento para o modo Capa
 ![Exemplo de carregamento para o modo Capa](https://github.com/user-attachments/assets/f4111dc5-12aa-4738-b2c0-009d98808ff0)
 
-<!--
-## Notificação de atualização
-![Update](docs/images/update-notification.png)
+## Verificar se o script está ativo
 
---->
+![AtivandoScript](https://mbitts.com/asc/tampermonkey1.png)
+
+![AtivandoScript](https://mbitts.com/asc/chrome1.png)
+
+**Obs**.: Para os usuários da extensão Tampermonkey (versão 5.3+) em um navegador baseado no **Chrome**, é necessário habilitar o "**Permitir Scripts do Usuário**" (disponível no Chrome 138+ nas configurações da extensão) ou o Modo de Desenvolvedor.
+
+![AtivandoExtensao](https://mbitts.com/asc/chrome2.png)
+
+Para mais informações verifique o link: 
+https://www.tampermonkey.net/faq.php?q=Q209
 
 # ⚙️ Configurações
 
