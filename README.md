@@ -22,7 +22,7 @@ Coleção de **User Scripts (Tampermonkey/Greasemonkey)** criados para **melhora
 - [📸 Exemplos visuais (screenshots)](#-exemplos-visuais-screenshots)
 - [⚙️ Configurações](#️-configurações)
 - [❓ Problemas comuns](#-problemas-comuns)
-- [👨‍💻 Contribuindo](#-contribuindo)
+- [👨‍💻 Contribuindo](#%E2%80%8D-contribuindo)
 - [📄 Licença](#-licença)
 
 ---
