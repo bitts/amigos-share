@@ -307,6 +307,83 @@ class ASL{
             msg(`Falha ao construir ícone de dados do script: ${e}`,'error');
         }
     }
+    /* realizando melhorias na apresentação
+    getAbout(){
+        var self = this;
+        try{
+            var about = $('<div />').addClass("card cfg-plg-bitts").append(
+                $('<h5 />').addClass("card-header bg-primary").text('Configurações do Plugin').append(
+                    $('<button />', {'alt':'Fechar', 'title':'Fechar', 'type':'button'}).addClass("btn btn-sm btn-info float-right m-0").append(
+                        $('<i />').addClass('fas fa-times')
+                    ).click(function(){
+                        $(this).closest('.cfg-plg-bitts').remove()
+                    })
+                ),
+                $('<div />').addClass("card-body").append(
+                    $('<div />').addClass("row").append(
+                        $('<form />').addClass('form-inline mb-3').append(
+                            $('<span />').addClass('mr-sm-2').html('Ajuste da paginação: '),
+                            $('<input />',{'type':'text', 'placeholder':'Informe um valor', 'name':'plg_ajuste'}).addClass('form-control mr-sm-0')
+                        )
+                    ),
+                    $('<div />').addClass("row").append(
+                        $('<a />', {'data-bs-toggle':'collapse','data-toggle':'collapse','href':'#conteudoCollapse','role':'button','aria-expanded':'false','aria-controls':'conteudoCollapse'}).addClass("btn btn-primary").text('Atualizações do Plugin'),
+                        $('<div />',{'id':'conteudoCollapse'}).addClass('collapse').append(
+                            $('<div />').addClass('card card-body').append(
+                                $('<div />').addClass("text-justify").append(
+                                    $('<h4 />').css({'text-align':'center'}).text(self.about.description),
+                                    $('<p />').css({'text-align':'center'}).html(`Criado por: ${self.about.author}`),
+                                    $('<p />').append(
+                                        'Suporte: ', $('<a />',{'href': self.about.supportURL}).text(self.about.supportURL),
+                                    ),
+                                    $('<p />').append(
+                                        'Github: ', $('<a />',{'href': self.about.github}).text(self.about.github),
+                                    ),
+                                    $('<br />'),
+                                    $('<p />').text('Atualizações:'),
+                                    $('<ul />').addClass('list-group').append(
+                                        Object.entries(self.about.upgrades).map(
+                                            udt => $('<li />').addClass('list-group-item d-flex align-items-center').append(
+                                                $('<span />').addClass('font-weight-bold p-2').text(udt[0]),
+                                                $('<span />').addClass('text-muted').html(udt[1])
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+
+            $('body').append(
+                $('<div />')
+                .addClass('tooltips')
+                .css({
+                    'position': 'fixed','bottom': '10px','left': '10px', 'cursor': 'pointer','z-index':'999',
+                    'line-height': '10px','text-align': 'center','color': 'white','background-color': 'black',
+                    'border': '2px solid grey','border-radius': '50%','width':'25px','height':'25px','padding-top': '5px'
+                })
+                .append(
+                    $('<p />').text('B').click(function(){
+                        if($('.cfg-plg-bitts').length == 0 ){
+                            $('body > div.container-fluid > div > div.col-sm-10.col-md-10.col-lg-10.p-2.mb-5').prepend(
+                                about
+                            )
+                        }
+                        $('html, body').animate({
+                            scrollTop: ".cfg-plg-bitts"
+                        }, 800);
+                    })
+                )
+            );
+
+
+        }catch(e){
+            msg(`Falha ao construir ícone de dados do script: ${e}`,'error');
+        }
+    }
+    */
     getSeparador(npg = 0, total = 0){
         if(total > 0 && npg <= this.pages){
             try{
