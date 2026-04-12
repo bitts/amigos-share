@@ -24,6 +24,8 @@ Coleção de **User Scripts (Tampermonkey/Greasemonkey)** criados para **melhora
 - [❓ Problemas comuns](#-problemas-comuns)
 - [👨‍💻 Contribuindo](#%E2%80%8D-contribuindo)
 - [📄 Licença](#-licença)
+- [⭐ Apoie o projeto](#-apoie-o-projeto)
+- [❤️ Autor](#%EF%B8%8F-autor)
 
 ---
 
