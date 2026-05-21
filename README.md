@@ -9,6 +9,11 @@ Coleção de **User Scripts (Tampermonkey/Greasemonkey)** criados para **melhora
 
 > 📌 Ideal para quem quer **mais produtividade, menos cliques e navegação contínua**.
 
+
+![Tampermonkey](https://img.shields.io/badge/Tampermonkey-OK-006989?labelColor=012A36)
+![Violentmonkey](https://img.shields.io/badge/Violentmonkey-OK-006989?labelColor=4B3F72)
+![FireMonkey](https://img.shields.io/badge/FireMonkey-NG-888?labelColor=885053)
+![Greasemonkey](https://img.shields.io/badge/Greasemonkey-NG-888?labelColor=A2A392)
 ---
 
 # 📚 Sumário
